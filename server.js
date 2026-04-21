@@ -1,6 +1,5 @@
 const express = require("express");
 const cors = require("cors");
-const path = require("path");
 const app = express();
  
 app.use(cors());
@@ -9,7 +8,6 @@ app.use(express.json());
 const ODDS_API_KEY = process.env.ODDS_API_KEY || "ca6d6693352b4b3e3ea11856734a9870";
 const ODDS_BASE = "https://api.the-odds-api.com/v4";
  
-// ── Odds proxy endpoints ──
 app.get("/api/odds/:sport", async (req, res) => {
   try {
     const { sport } = req.params;
@@ -25,821 +23,619 @@ app.get("/api/odds/:sport", async (req, res) => {
   }
 });
  
-app.get("/api/sports", async (req, res) => {
-  try {
-    const response = await fetch(`${ODDS_BASE}/sports/?apiKey=${ODDS_API_KEY}`);
-    const data = await response.json();
-    res.json(data);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
+app.get("/api/health", (req, res) => res.json({ status: "EDGE//STACK Online" }));
  
-app.get("/api/health", (req, res) => {
-  res.json({ status: "EDGE//STACK Online", version: "2.0" });
-});
- 
-// ── Serve the platform HTML ──
 app.get("/", (req, res) => {
-  res.send(`<!DOCTYPE html>
+  res.setHeader("Content-Type", "text/html");
+  res.end(`<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>EDGE//STACK</title>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: #080B14; color: #E8EAF0; font-family: 'Courier New', monospace; }
-    input[type=range] { accent-color: #FF6B35; }
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: #080B14; }
-    ::-webkit-scrollbar-thumb { background: rgba(255,107,53,0.3); border-radius: 2px; }
-    select option { background: #0D1119; }
-  </style>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EDGE//STACK</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#080B14;color:#E8EAF0;font-family:'Courier New',monospace;min-height:100vh}
+.bg{position:fixed;inset:0;background-image:linear-gradient(rgba(255,107,53,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,53,.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 14px 90px}
+.hdr{padding:18px 0 12px;border-bottom:1px solid rgba(255,107,53,.12);display:flex;align-items:center;gap:12px}
+.logo{width:32px;height:32px;background:linear-gradient(135deg,#FF6B35,#F0A500);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#080B14;flex-shrink:0}
+.tabs{display:flex;gap:2px;padding:8px 0 12px;overflow-x:auto}
+.tab{background:transparent;border:1px solid transparent;color:#374151;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:9px;letter-spacing:2px;font-family:inherit;white-space:nowrap;transition:all .15s}
+.tab.on{background:rgba(255,107,53,.1);border-color:rgba(255,107,53,.4);color:#FF6B35}
+.card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.lbl{font-size:9px;color:#374151;letter-spacing:2px;margin-bottom:5px;display:block}
+input,select{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#E8EAF0;padding:8px 10px;font-size:12px;font-family:inherit;box-sizing:border-box;outline:none}
+select{background:#0D1119}
+.btn{border:none;border-radius:6px;cursor:pointer;font-size:10px;letter-spacing:2px;font-family:inherit;padding:7px 14px;white-space:nowrap}
+.o{background:rgba(255,107,53,.18);border:1px solid rgba(255,107,53,.44);color:#FF6B35}
+.tc{background:rgba(78,205,196,.18);border:1px solid rgba(78,205,196,.44);color:#4ECDC4}
+.r{background:rgba(255,71,87,.18);border:1px solid rgba(255,71,87,.44);color:#FF4757}
+.prim{background:linear-gradient(135deg,#FF6B35,#F0A500);color:#080B14;font-weight:700;width:100%;padding:10px;margin-top:10px;font-size:11px}
+.bar{position:fixed;bottom:0;left:0;right:0;background:rgba(8,11,20,.96);border-top:1px solid rgba(255,107,53,.1);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10}
+.hidden{display:none!important}
+input[type=range]{accent-color:#FF6B35}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:rgba(255,107,53,.3);border-radius:2px}
+</style>
 </head>
 <body>
-  <div id="root"></div>
-  <script type="text/babel" data-presets="react">
-    const { useState, useEffect, useCallback } = React;
+<div class="bg"></div>
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">E</div>
+    <div>
+      <div style="font-size:14px;font-weight:700;letter-spacing:3px;color:#FF6B35">EDGE//STACK</div>
+      <div style="font-size:9px;color:#1F2937;letter-spacing:2px">AU · NFL · NBA · AFL · AI POWERED</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+      <span style="font-size:9px;color:#4ECDC4">BK $</span>
+      <input id="bk" type="number" value="1000" style="width:75px;background:rgba(78,205,196,.07);border:1px solid rgba(78,205,196,.2);color:#4ECDC4;font-weight:700;text-align:right" onchange="S.bankroll=parseFloat(this.value)||0;uBar()">
+    </div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div id="pg"></div>
+</div>
+<div class="bar">
+  <span style="font-size:9px;color:#1F2937;letter-spacing:1px">EDGE//STACK · AU · AI · LIVE</span>
+  <div style="display:flex;gap:12px">
+    <span id="b-wr" style="font-size:9px"></span>
+    <span id="b-clv" style="font-size:9px"></span>
+    <span id="b-bk" style="font-size:9px;color:#FF6B35"></span>
+    <span id="b-lim" style="font-size:9px"></span>
+  </div>
+</div>
  
-    // ── Config — all API calls go through this same server ──
-    const PROXY = "";  // empty = same origin
-    const ANTHROPIC_BASE = "https://api.anthropic.com/v1";
+<script>
+const BOOKS=[
+  {k:"pinnacle",l:"Pinnacle",t:"SHARP",c:"#4ECDC4"},
+  {k:"sportsbet",l:"Sportsbet",t:"SOFT",c:"#FF6B35"},
+  {k:"ladbrokes",l:"Ladbrokes",t:"SOFT",c:"#FF6B35"},
+  {k:"neds",l:"Neds",t:"SOFT",c:"#FF6B35"},
+  {k:"tab",l:"TAB",t:"SEMI",c:"#F0A500"},
+  {k:"betnation",l:"BetNation",t:"SOFT",c:"#FF6B35"},
+];
+const MB=["sportsbet","neds","tab","betnation"];
+const SC={NBA:"#FF6B35",NFL:"#4ECDC4",AFL:"#00A86B"};
+const SK={NBA:"basketball_nba",NFL:"americanfootball_nfl",AFL:"aussierules_afl"};
  
-    const SPORT_KEYS = { NBA: "basketball_nba", NFL: "americanfootball_nfl", AFL: "aussierules_afl" };
-    const SPORT_COLORS = { NBA: "#FF6B35", NFL: "#4ECDC4", AFL: "#00A86B" };
-    const AU_BOOKS = [
-      { key: "pinnacle", label: "Pinnacle", tier: "SHARP", color: "#4ECDC4" },
-      { key: "sportsbet", label: "Sportsbet", tier: "SOFT", color: "#FF6B35" },
-      { key: "ladbrokes", label: "Ladbrokes", tier: "SOFT", color: "#FF6B35" },
-      { key: "neds", label: "Neds", tier: "SOFT", color: "#FF6B35" },
-      { key: "tab", label: "TAB", tier: "SEMI", color: "#F0A500" },
-      { key: "betnation", label: "BetNation", tier: "SOFT", color: "#FF6B35" },
-    ];
-    const MANUAL_BOOKS = ["sportsbet", "neds", "tab", "betnation"];
+const S={
+  tab:"dashboard",bankroll:1000,kf:.5,
+  bets:[
+    {id:1,date:"2024-01-15",sport:"NBA",game:"Lakers vs Celtics",pick:"Lakers -3.5",betOdds:-110,closingOdds:-115,result:"W",stake:27.5,bk:"sportsbet"},
+    {id:2,date:"2024-01-16",sport:"NFL",game:"Chiefs vs Ravens",pick:"Over 47.5",betOdds:-108,closingOdds:-112,result:"L",stake:27.5,bk:"ladbrokes"},
+    {id:3,date:"2024-01-17",sport:"NBA",game:"Warriors vs Suns",pick:"Warriors +2",betOdds:-105,closingOdds:-110,result:"W",stake:28,bk:"pinnacle"},
+    {id:4,date:"2024-01-18",sport:"AFL",game:"Collingwood vs Richmond",pick:"Collingwood -9.5",betOdds:-110,closingOdds:-118,result:"W",stake:27,bk:"sportsbet"},
+    {id:5,date:"2024-01-20",sport:"NBA",game:"Bucks vs Heat",pick:"Giannis O 32.5",betOdds:-112,closingOdds:-120,result:"W",stake:27.25,bk:"neds"},
+    {id:6,date:"2024-01-21",sport:"NFL",game:"49ers vs Packers",pick:"49ers -6.5",betOdds:-110,closingOdds:-108,result:"W",stake:27.5,bk:"tab"},
+    {id:7,date:"2024-01-22",sport:"AFL",game:"Geelong vs Hawthorn",pick:"Under 164.5",betOdds:-106,closingOdds:-110,result:"L",stake:27.75,bk:"betnation"},
+  ],
+  limits:[{id:1,bk:"sportsbet",orig:100,curr:20,date:"2024-01-10",notes:"Limited after winning run"}],
+  odds:[],aOdds:[],aRes:{},selGame:null,mOdds:{},
+  legs:[{id:1,pick:"",odds:-110,wp:55},{id:2,pick:"",odds:-110,wp:55}],
+  aSport:"AFL",oSport:"AFL",
+};
  
-    function americanToDecimal(o) { if (!o) return 1; return o > 0 ? o/100+1 : 100/Math.abs(o)+1; }
-    function americanToImplied(o) { return (1/americanToDecimal(o))*100; }
-    function formatOdds(o) { if (!o) return "—"; return o > 0 ? "+"+o : ""+o; }
-    function calcKelly(p, odds) { const b=americanToDecimal(odds)-1,q=1-p/100; return Math.max(0,((b*p/100-q)/b)*100); }
-    function calcCLV(bet, close) { if(!bet||!close) return 0; return americanToImplied(close)-americanToImplied(bet); }
-    function bookLabel(key) { return AU_BOOKS.find(b=>b.key===key)?.label||key; }
+function a2d(o){if(!o)return 1;return o>0?o/100+1:100/Math.abs(o)+1;}
+function a2i(o){return(1/a2d(o))*100;}
+function fo(o){if(!o)return"—";return o>0?"+"+o:""+o;}
+function cv(b,c){if(!b||!c)return 0;return a2i(c)-a2i(b);}
+function kl(p,o){const b=a2d(o)-1,q=1-p/100;return Math.max(0,((b*p/100-q)/b)*100);}
+function bl(k){return BOOKS.find(b=>b.k===k)?.l||k;}
+function settled(){return S.bets.filter(b=>b.result!=="P");}
+function sts(){
+  const s=settled();
+  const w=s.filter(b=>b.result==="W").length;
+  const wr=s.length?w/s.length*100:0;
+  const p=s.reduce((a,b)=>b.result==="W"?a+b.stake*(a2d(b.betOdds)-1):b.result==="L"?a-b.stake:a,0);
+  const ac=s.reduce((a,b)=>a+cv(b.betOdds,b.closingOdds),0)/(s.length||1);
+  const cr=s.length?s.filter(b=>cv(b.betOdds,b.closingOdds)>0).length/s.length*100:0;
+  return{s,w,wr,p,ac,cr};
+}
+function uBar(){
+  const {wr,p,ac}=sts();
+  const q=id=>document.getElementById(id);
+  q("b-wr")&&(q("b-wr").textContent="WIN "+wr.toFixed(1)+"%",q("b-wr").style.color=wr>=52.4?"#4ECDC4":"#FF4757");
+  q("b-clv")&&(q("b-clv").textContent="CLV "+(ac>=0?"+":"")+ac.toFixed(2)+"%",q("b-clv").style.color=ac>=0?"#4ECDC4":"#FF4757");
+  q("b-bk")&&(q("b-bk").textContent="BK $"+S.bankroll.toFixed(0));
+  q("b-lim")&&(q("b-lim").textContent=S.limits.length+" LIMITED",q("b-lim").style.color=S.limits.length?"#FF4757":"#374151");
+}
  
-    const INITIAL_BETS = [
-      {id:1,date:"2024-01-15",sport:"NBA",game:"Lakers vs Celtics",pick:"Lakers -3.5",betOdds:-110,closingOdds:-115,result:"W",stake:27.50,bookmaker:"sportsbet"},
-      {id:2,date:"2024-01-16",sport:"NFL",game:"Chiefs vs Ravens",pick:"Over 47.5",betOdds:-108,closingOdds:-112,result:"L",stake:27.50,bookmaker:"ladbrokes"},
-      {id:3,date:"2024-01-17",sport:"NBA",game:"Warriors vs Suns",pick:"Warriors +2",betOdds:-105,closingOdds:-110,result:"W",stake:28.00,bookmaker:"pinnacle"},
-      {id:4,date:"2024-01-18",sport:"AFL",game:"Collingwood vs Richmond",pick:"Collingwood -9.5",betOdds:-110,closingOdds:-118,result:"W",stake:27.00,bookmaker:"sportsbet"},
-      {id:5,date:"2024-01-20",sport:"NBA",game:"Bucks vs Heat",pick:"Giannis O 32.5",betOdds:-112,closingOdds:-120,result:"W",stake:27.25,bookmaker:"neds"},
-      {id:6,date:"2024-01-21",sport:"NFL",game:"49ers vs Packers",pick:"49ers -6.5",betOdds:-110,closingOdds:-108,result:"W",stake:27.50,bookmaker:"tab"},
-      {id:7,date:"2024-01-22",sport:"AFL",game:"Geelong vs Hawthorn",pick:"Under 164.5",betOdds:-106,closingOdds:-110,result:"L",stake:27.75,bookmaker:"betnation"},
-    ];
-    const INITIAL_LIMITS = [
-      {id:1,book:"sportsbet",originalMax:100,currentMax:20,date:"2024-01-10",notes:"Limited after 3 week winning run"},
-    ];
+const TABS=[
+  {id:"dashboard",icon:"⬡",label:"Dashboard"},
+  {id:"tracker",icon:"◈",label:"Tracker"},
+  {id:"analysis",icon:"◎",label:"AI Analysis"},
+  {id:"multi",icon:"◇",label:"Multi EV"},
+  {id:"kelly",icon:"△",label:"Kelly"},
+  {id:"clv",icon:"▷",label:"CLV"},
+  {id:"odds",icon:"◉",label:"Live Odds"},
+  {id:"books",icon:"▣",label:"Books"},
+  {id:"settings",icon:"⚙",label:"Settings"},
+];
  
-    const s = {
-      card: {background:"rgba(255,255,255,0.02)",border:"1px solid rgba(255,255,255,0.07)",borderRadius:12,padding:"16px"},
-      inp: (a="#FF6B35")=>({width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid "+a+"33",borderRadius:8,color:a,padding:"10px 12px",fontSize:17,fontWeight:700,fontFamily:"inherit",boxSizing:"border-box",textAlign:"center",outline:"none"}),
-      lbl: {fontSize:9,color:"#374151",letterSpacing:2,marginBottom:5,display:"block"},
-      fi: {width:"100%",background:"rgba(255,255,255,0.04)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,color:"#E8EAF0",padding:"8px 10px",fontSize:12,fontFamily:"inherit",boxSizing:"border-box",outline:"none"},
-      sel: {width:"100%",background:"#0D1119",border:"1px solid rgba(255,255,255,0.08)",borderRadius:6,color:"#E8EAF0",padding:"8px 10px",fontSize:12,fontFamily:"inherit",boxSizing:"border-box"},
-      btn: (a="#FF6B35")=>({background:a+"18",border:"1px solid "+a+"44",color:a,padding:"7px 14px",borderRadius:6,cursor:"pointer",fontSize:10,letterSpacing:2,fontFamily:"inherit",whiteSpace:"nowrap"}),
-    };
+function renderTabs(){
+  document.getElementById("tabs").innerHTML=TABS.map(t=>
+    `<button class="tab${S.tab===t.id?" on":""}" onclick="goTab('${t.id}')">${t.icon} ${t.label}</button>`
+  ).join("");
+}
  
-    function Sparkline({data,color="#4ECDC4",height=40}){
-      if(data.length<2) return null;
-      const vals=data.map(d=>d.value),min=Math.min(...vals),max=Math.max(...vals),range=max-min||1;
-      const w=200,h=height;
-      const pts=vals.map((v,i)=>(i/(vals.length-1))*w+","+(h-((v-min)/range)*h)).join(" ");
-      return React.createElement("svg",{viewBox:"0 0 "+w+" "+h,style:{width:"100%",height},preserveAspectRatio:"none"},
-        React.createElement("polyline",{points:pts,fill:"none",stroke:color,strokeWidth:"1.5",strokeLinejoin:"round"}),
-        React.createElement("polyline",{points:"0,"+h+" "+pts+" "+w+","+h,fill:color+"12",stroke:"none"})
-      );
-    }
+function goTab(id){
+  S.tab=id;
+  renderTabs();
+  renderPage();
+  if(id==="analysis"&&S.aOdds.length===0) fetchOdds(S.aSport,"aOdds");
+  if(id==="odds"&&S.odds.length===0) fetchOdds(S.oSport,"odds");
+}
  
-    function App(){
-      const [cfg,setCfg]=useState({bankroll:1000,kellyFraction:0.5,oddsApiKey:"ca6d6693352b4b3e3ea11856734a9870"});
-      const [tab,setTab]=useState("dashboard");
-      const [bets,setBets]=useState(INITIAL_BETS);
-      const [limits,setLimits]=useState(INITIAL_LIMITS);
-      const [showAddBet,setShowAddBet]=useState(false);
-      const [showAddLimit,setShowAddLimit]=useState(false);
-      const [newBet,setNewBet]=useState({date:"",sport:"AFL",game:"",pick:"",betOdds:-110,closingOdds:-110,result:"P",bookmaker:"sportsbet"});
-      const [newLimit,setNewLimit]=useState({book:"sportsbet",originalMax:"",currentMax:"",date:"",notes:""});
-      const [winProb,setWinProb]=useState(55);
-      const [betOddsCalc,setBetOddsCalc]=useState(-110);
-      const [closingOddsInput,setClosingOddsInput]=useState(-115);
-      const [selectedSport,setSelectedSport]=useState("AFL");
-      const [liveOdds,setLiveOdds]=useState([]);
-      const [oddsLoading,setOddsLoading]=useState(false);
-      const [oddsError,setOddsError]=useState(null);
-      const [requestsRemaining,setRequestsRemaining]=useState(null);
-      const [selectedGame,setSelectedGame]=useState(null);
-      const [manualOdds,setManualOdds]=useState({});
-      const [analysisSport,setAnalysisSport]=useState("AFL");
-      const [analysisOdds,setAnalysisOdds]=useState([]);
-      const [analysisOddsLoading,setAnalysisOddsLoading]=useState(false);
-      const [analysisLoading,setAnalysisLoading]=useState({});
-      const [analysisResults,setAnalysisResults]=useState({});
-      const [multiLegs,setMultiLegs]=useState([{id:1,pick:"",odds:-110,winProb:55},{id:2,pick:"",odds:-110,winProb:55}]);
+async function fetchOdds(sport,target){
+  document.getElementById("pg").innerHTML=`<div style="text-align:center;padding:50px;color:#374151">Fetching ${sport} odds···</div>`;
+  try{
+    const r=await fetch("/api/odds/"+SK[sport]+"?regions=us,au,uk&markets=h2h,spreads,totals&oddsFormat=american");
+    if(!r.ok) throw new Error("API error "+r.status);
+    S[target]=await r.json();
+    const rem=r.headers.get("x-requests-remaining");
+    S.remReq=rem;
+  }catch(e){
+    S[target]=[];
+    S.oddsErr=e.message;
+  }
+  renderPage();
+}
  
-      const settled=bets.filter(b=>b.result!=="P");
-      const wins=settled.filter(b=>b.result==="W").length;
-      const winRate=settled.length?(wins/settled.length*100):0;
-      const totalStaked=settled.reduce((a,b)=>a+b.stake,0);
-      const totalReturned=settled.reduce((a,b)=>b.result==="W"?a+b.stake*americanToDecimal(b.betOdds):a,0);
-      const totalProfit=totalReturned-totalStaked;
-      const avgCLV=settled.reduce((a,b)=>a+calcCLV(b.betOdds,b.closingOdds),0)/(settled.length||1);
-      const clvRate=settled.length?(settled.filter(b=>calcCLV(b.betOdds,b.closingOdds)>0).length/settled.length*100):0;
-      const kellyPct=calcKelly(winProb,betOddsCalc);
-      const halfKelly=kellyPct*cfg.kellyFraction;
-      const betSize=(cfg.bankroll*halfKelly/100).toFixed(2);
-      const edge=(winProb-americanToImplied(betOddsCalc)).toFixed(2);
+async function runAnalysis(gid){
+  const g=S.aOdds.find(x=>x.id===gid);
+  if(!g)return;
+  S.aRes[gid]="LOADING";
+  renderPage();
+  try{
+    const pH=g.bookmakers?.find(b=>b.key==="pinnacle")?.markets?.find(m=>m.key==="h2h");
+    const pS=g.bookmakers?.find(b=>b.key==="pinnacle")?.markets?.find(m=>m.key==="spreads");
+    const pT=g.bookmakers?.find(b=>b.key==="pinnacle")?.markets?.find(m=>m.key==="totals");
+    const oc=[
+      pH?"H2H: "+pH.outcomes?.map(o=>o.name+" "+fo(o.price)).join(" / "):null,
+      pS?"Spread: "+pS.outcomes?.map(o=>o.name+" "+(o.point>0?"+":"")+o.point+" "+fo(o.price)).join(" / "):null,
+      pT?"Total: "+pT.outcomes?.map(o=>o.name+" "+o.point+" "+fo(o.price)).join(" / "):null,
+    ].filter(Boolean).join("\\n")||"No Pinnacle odds";
+    const prompt=`You are a sharp professional sports betting analyst specialising in Australian betting markets.
  
-      const bankrollHistory=(()=>{
-        let bal=cfg.bankroll;
-        const h=[{date:"Start",value:bal}];
-        [...settled].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(bet=>{
-          if(bet.result==="W") bal+=bet.stake*(americanToDecimal(bet.betOdds)-1);
-          else if(bet.result==="L") bal-=bet.stake;
-          h.push({date:bet.date,value:parseFloat(bal.toFixed(2))});
-        });
-        return h;
-      })();
+GAME: ${g.away_team} @ ${g.home_team}
+DATE: ${new Date(g.commence_time).toLocaleDateString("en-AU")}
+SPORT: ${S.aSport}
  
-      const bookStats=AU_BOOKS.map(book=>{
-        const bb=settled.filter(b=>b.bookmaker===book.key);
-        const bw=bb.filter(b=>b.result==="W").length;
-        const bwr=bb.length?(bw/bb.length*100):0;
-        const bp=bb.reduce((a,b)=>b.result==="W"?a+b.stake*(americanToDecimal(b.betOdds)-1):b.result==="L"?a-b.stake:a,0);
-        const bc=bb.reduce((a,b)=>a+calcCLV(b.betOdds,b.closingOdds),0)/(bb.length||1);
-        return{...book,bets:bb.length,winRate:bwr,profit:bp,clv:bc,limitInfo:limits.find(l=>l.book===book.key),atRisk:bb.length>=30&&bwr>=58};
-      });
+PINNACLE ODDS:
+${oc}
  
-      const sportStats=Object.keys(SPORT_KEYS).map(sport=>{
-        const sb=settled.filter(b=>b.sport===sport);
-        const sw=sb.filter(b=>b.result==="W").length;
-        const profit=sb.reduce((a,b)=>b.result==="W"?a+b.stake*(americanToDecimal(b.betOdds)-1):b.result==="L"?a-b.stake:a,0);
-        return{sport,bets:sb.length,winRate:sb.length?sw/sb.length*100:0,profit,clv:sb.reduce((a,b)=>a+calcCLV(b.betOdds,b.closingOdds),0)/(sb.length||1)};
-      });
+Using your knowledge of these teams provide:
  
-      const multiCalc=(()=>{
-        const legs=multiLegs.filter(l=>l.odds&&l.winProb>0);
-        if(legs.length<2) return null;
-        const combinedDec=legs.reduce((a,l)=>a*americanToDecimal(l.odds),1);
-        const combinedProb=legs.reduce((a,l)=>a*(l.winProb/100),1)*100;
-        const ev=(combinedProb/100)*(combinedDec-1)-(1-combinedProb/100);
-        const combinedAmerican=combinedDec>=2?Math.round((combinedDec-1)*100):Math.round(-100/(combinedDec-1));
-        return{combinedDec,combinedProb,ev,allPositive:legs.every(l=>(l.winProb-americanToImplied(l.odds))>0),combinedAmerican,legs:legs.length};
-      })();
+EDGE ASSESSMENT: [Value on either side? Which market?]
  
-      const fetchLiveOdds=useCallback(async(sport,setterFn,setLoadingFn,setErrorFn)=>{
-        setLoadingFn(true);setErrorFn&&setErrorFn(null);
-        try{
-          const res=await fetch(PROXY+"/api/odds/"+SPORT_KEYS[sport]+"?regions=us,au,uk&markets=h2h,spreads,totals&oddsFormat=american");
-          if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error||"Error "+res.status);}
-          const data=await res.json();
-          setRequestsRemaining(res.headers.get("x-requests-remaining"));
-          setterFn(data);
-        }catch(e){setErrorFn&&setErrorFn(e.message);}
-        finally{setLoadingFn(false);}
-      },[]);
+KEY FACTORS:
+- [Factor 1]
+- [Factor 2]
+- [Factor 3]
  
-      useEffect(()=>{
-        if(tab==="odds"){setSelectedGame(null);setManualOdds({});fetchLiveOdds(selectedSport,setLiveOdds,setOddsLoading,setOddsError);}
-      },[tab,selectedSport]);
+RECOMMENDED BET: [Pick, market, which AU book, confidence Low/Medium/High]
  
-      useEffect(()=>{
-        if(tab==="analysis") fetchLiveOdds(analysisSport,setAnalysisOdds,setAnalysisOddsLoading,null);
-      },[tab,analysisSport]);
+CLV EXPECTATION: [Will line move in your favour?]
  
-      async function runAnalysis(game,sport){
-        const gid=game.id;
-        setAnalysisLoading(p=>({...p,[gid]:true}));
-        setAnalysisResults(p=>({...p,[gid]:null}));
-        try{
-          const pinH2H=game.bookmakers?.find(b=>b.key==="pinnacle")?.markets?.find(m=>m.key==="h2h");
-          const pinSpread=game.bookmakers?.find(b=>b.key==="pinnacle")?.markets?.find(m=>m.key==="spreads");
-          const pinTotal=game.bookmakers?.find(b=>b.key==="pinnacle")?.markets?.find(m=>m.key==="totals");
-          const oddsCtx=[
-            pinH2H?"H2H: "+pinH2H.outcomes?.map(o=>o.name+" "+formatOdds(o.price)).join(" / "):null,
-            pinSpread?"Spread: "+pinSpread.outcomes?.map(o=>o.name+" "+(o.point>0?"+":"")+o.point+" "+formatOdds(o.price)).join(" / "):null,
-            pinTotal?"Total: "+pinTotal.outcomes?.map(o=>o.name+" "+o.point+" "+formatOdds(o.price)).join(" / "):null,
-          ].filter(Boolean).join("\n");
+MULTI POTENTIAL: [Good multi leg or too risky?]
  
-          const prompt="You are a sharp professional sports betting analyst specialising in Australian betting markets.\n\nGAME: "+game.away_team+" @ "+game.home_team+"\nDATE: "+new Date(game.commence_time).toLocaleDateString("en-AU")+"\nSPORT: "+sport+"\n\nPINNACLE ODDS:\n"+(oddsCtx||"No Pinnacle odds available — use other books if shown")+"\n\nUsing your knowledge of these teams, provide:\n\nEDGE ASSESSMENT: [Value on either side? Which market?]\n\nKEY FACTORS:\n- [Factor 1]\n- [Factor 2]\n- [Factor 3]\n\nRECOMMENDED BET: [Pick, market, which AU book, confidence Low/Medium/High]\n\nCLV EXPECTATION: [Will line move in your favour?]\n\nMULTI POTENTIAL: [Good multi leg or too risky?]\n\nVERDICT: [One sentence. No hedging.]";
+VERDICT: [One sentence. No hedging.]`;
+    const r=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
+    });
+    const d=await r.json();
+    S.aRes[gid]=d.content?.find(c=>c.type==="text")?.text||"No analysis returned";
+  }catch(e){S.aRes[gid]="Error: "+e.message;}
+  renderPage();
+}
  
-          const res=await fetch(ANTHROPIC_BASE+"/messages",{
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
-          });
-          if(!res.ok) throw new Error("Analysis error "+res.status);
-          const data=await res.json();
-          setAnalysisResults(p=>({...p,[gid]:data.content?.find(c=>c.type==="text")?.text||"No analysis returned"}));
-        }catch(e){
-          setAnalysisResults(p=>({...p,[gid]:"Error: "+e.message}));
-        }finally{
-          setAnalysisLoading(p=>({...p,[gid]:false}));
-        }
-      }
+function addBet(){
+  const g=id=>document.getElementById("nb-"+id);
+  S.bets.push({
+    id:Date.now(),date:g("date").value,sport:g("sport").value,game:g("game").value,
+    pick:g("pick").value,betOdds:parseInt(g("betOdds").value)||0,
+    closingOdds:parseInt(g("closingOdds").value)||0,result:g("result").value,
+    bk:g("bk").value,stake:parseFloat((S.bankroll*kl(55,-110)*S.kf/100).toFixed(2)),
+  });
+  uBar();goTab("tracker");
+}
  
-      function addBet(){
-        setBets(p=>[...p,{...newBet,id:Date.now(),stake:parseFloat(betSize)}]);
-        setShowAddBet(false);
-        setNewBet({date:"",sport:"AFL",game:"",pick:"",betOdds:-110,closingOdds:-110,result:"P",bookmaker:"sportsbet"});
-      }
+function addLimit(){
+  S.limits.push({id:Date.now(),bk:document.getElementById("nl-bk").value,orig:parseFloat(document.getElementById("nl-orig").value)||0,curr:parseFloat(document.getElementById("nl-curr").value)||0,date:document.getElementById("nl-date").value,notes:document.getElementById("nl-notes").value});
+  uBar();renderPage();
+}
  
-      function addLimit(){
-        setLimits(p=>[...p,{...newLimit,id:Date.now(),originalMax:parseFloat(newLimit.originalMax),currentMax:parseFloat(newLimit.currentMax)}]);
-        setShowAddLimit(false);
-        setNewLimit({book:"sportsbet",originalMax:"",currentMax:"",date:"",notes:""});
-      }
+function mCalc(){
+  const l=S.legs.filter(x=>x.odds&&x.wp>0);
+  if(l.length<2)return null;
+  const d=l.reduce((a,x)=>a*a2d(x.odds),1);
+  const p=l.reduce((a,x)=>a*(x.wp/100),1)*100;
+  const ev=(p/100)*(d-1)-(1-p/100);
+  const am=d>=2?Math.round((d-1)*100):Math.round(-100/(d-1));
+  return{d,p,ev,am,allPos:l.every(x=>(x.wp-a2i(x.odds))>0),n:l.length};
+}
  
-      function logFromLive(game,pick,bookKey,odds){
-        setNewBet({date:new Date().toISOString().split("T")[0],sport:selectedSport,game:game.away_team+" @ "+game.home_team,pick,betOdds:odds,closingOdds:odds,result:"P",bookmaker:bookKey.replace("_au","")});
-        setShowAddBet(true);setTab("tracker");
-      }
+function card(content,extra=""){return`<div class="card" ${extra}>${content}</div>`;}
+function metric(label,value,sub,color){return`<div class="card" style="position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,${color},transparent)"></div><div style="font-size:9px;color:#374151;letter-spacing:2px;margin-bottom:4px">${label}</div><div style="font-size:22px;font-weight:900;color:${color};line-height:1">${value}</div><div style="font-size:10px;color:#4A5568;margin-top:4px">${sub}</div></div>`;}
+function miniCard(label,value,color){return`<div class="card" style="text-align:center;padding:12px"><div style="font-size:9px;color:#374151;margin-bottom:5px">${label}</div><div style="font-size:16px;font-weight:900;color:${color}">${value}</div></div>`;}
+function progRow(label,val,threshold,max){const c=val>=threshold?"#4ECDC4":"#FF4757";return`<div style="margin-bottom:9px"><div style="display:flex;justify-content:space-between;font-size:10px;color:#4A5568;margin-bottom:4px"><span>${label}</span><span style="color:${c}">${val.toFixed(1)}%</span></div><div style="height:3px;background:rgba(255,255,255,.04);border-radius:3px;overflow:hidden"><div style="height:100%;width:${Math.min(val/max*100,100)}%;background:${c};border-radius:3px"></div></div></div>`;}
  
-      function getBest(game,market,ti){
-        let best=null,bestBook=null;
-        for(const bm of game.bookmakers||[]){
-          const o=bm.markets?.find(x=>x.key===market)?.outcomes[ti];
-          if(!o) continue;
-          if(best===null||o.price>best){best=o.price;bestBook=bm.key;}
-        }
-        return{odds:best,book:bestBook};
-      }
+function renderPage(){
+  const pg=document.getElementById("pg");
+  const {s,w,wr,p,ac,cr}=sts();
+  const t=S.tab;
  
-      const tabs=[
-        {id:"dashboard",label:"Dashboard",icon:"⬡"},
-        {id:"tracker",label:"Tracker",icon:"◈"},
-        {id:"analysis",label:"AI Analysis",icon:"◎"},
-        {id:"multi",label:"Multi EV",icon:"◇"},
-        {id:"kelly",label:"Kelly",icon:"△"},
-        {id:"clv",label:"CLV",icon:"▷"},
-        {id:"odds",label:"Live Odds",icon:"◉"},
-        {id:"books",label:"Books",icon:"▣"},
-        {id:"breakdown",label:"Breakdown",icon:"◐"},
-        {id:"settings",label:"Settings",icon:"⚙"},
-      ];
+  if(t==="dashboard"){
+    const bh=[S.bankroll];
+    [...s].sort((a,b)=>new Date(a.date)-new Date(b.date)).forEach(b=>{
+      const l=bh[bh.length-1];
+      bh.push(b.result==="W"?l+b.stake*(a2d(b.betOdds)-1):b.result==="L"?l-b.stake:l);
+    });
+    const mn=Math.min(...bh),mx=Math.max(...bh),rng=mx-mn||1;
+    const pts=bh.map((v,i)=>((i/(bh.length-1))*200)+","+(40-((v-mn)/rng)*40)).join(" ");
+    const col=p>=0?"#4ECDC4":"#FF4757";
+    pg.innerHTML=`
+    <div class="g2" style="margin-bottom:12px">
+      ${metric("WIN RATE",wr.toFixed(1)+"%",w+"W · "+(s.length-w)+"L",wr>=52.4?"#4ECDC4":"#FF4757")}
+      ${metric("PROFIT",(p>=0?"+":"")+"$"+p.toFixed(0),(p/(S.bankroll*.0275)).toFixed(1)+" units",p>=0?"#FF6B35":"#FF4757")}
+      ${metric("AVG CLV",(ac>=0?"+":"")+ac.toFixed(2)+"%",cr.toFixed(0)+"% positive",ac>=0?"#4ECDC4":"#FF4757")}
+      ${metric("BETS",s.length,S.bets.filter(b=>b.result==="P").length+" pending","#F0A500")}
+    </div>
+    ${card(`<div style="font-size:9px;color:#374151;letter-spacing:2px;margin-bottom:8px">◈ BANKROLL GROWTH</div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:#4A5568;margin-bottom:6px"><span>Start: $${bh[0].toFixed(0)}</span><span style="color:${col}">Now: $${bh[bh.length-1].toFixed(0)}</span></div>
+      <svg viewBox="0 0 200 40" style="width:100%;height:48px" preserveAspectRatio="none">
+        <polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round"/>
+        <polyline points="0,40 ${pts} 200,40" fill="${col}12" stroke="none"/>
+      </svg>`,"style='margin-bottom:12px'")}
+    <div style="background:rgba(255,107,53,.03);border:1px solid rgba(255,107,53,.12);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-size:9px;color:#FF6B35;letter-spacing:2px;margin-bottom:10px">◎ EDGE HEALTH</div>
+      ${progRow("Win Rate vs Breakeven 52.4%",wr,52.4,65)}
+      ${progRow("CLV Positive Rate",cr,50,100)}
+      ${progRow("Sample Confidence (1000+ target)",Math.min(s.length/10,100),50,100)}
+    </div>
+    ${card(`<div style="font-size:9px;color:#374151;letter-spacing:2px;margin-bottom:0;border-bottom:1px solid rgba(255,255,255,.05);padding-bottom:10px;margin:0 -16px 0;padding:10px 16px 10px">RECENT BETS</div>
+    ${S.bets.slice(-6).reverse().map(b=>{const c2=cv(b.betOdds,b.closingOdds);return`<div style="display:flex;align-items:center;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.03);gap:10px"><div style="width:5px;height:5px;border-radius:50%;background:${b.result==="W"?"#4ECDC4":b.result==="L"?"#FF4757":"#F0A500"};flex-shrink:0"></div><span style="font-size:9px;color:${SC[b.sport]||"#FF6B35"};width:34px;flex-shrink:0">${b.sport}</span><span style="flex:1;font-size:11px;color:#9CA3AF;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${b.pick}</span><span style="font-size:9px;color:#374151;flex-shrink:0">${bl(b.bk)}</span><span style="font-size:10px;color:${c2>0?"#4ECDC4":"#FF4757"};flex-shrink:0">${c2>0?"+":""}${c2.toFixed(1)}%</span><span style="font-size:11px;font-weight:700;color:${b.result==="W"?"#4ECDC4":b.result==="L"?"#FF4757":"#F0A500"};width:16px;text-align:center">${b.result}</span></div>`;}).join("")}`,"style='padding:0 16px'")}`;
+  }
  
-      const T=(tag,props,...children)=>React.createElement(tag,props,...children);
-      const D=(props,...children)=>T("div",props,...children);
-      const B=(props,...children)=>T("button",props,...children);
+  else if(t==="tracker"){
+    pg.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:9px;color:#374151;letter-spacing:2px">${S.bets.length} BETS LOGGED</div>
+      <button class="btn o" onclick="document.getElementById('abf').classList.toggle('hidden')">+ LOG BET</button>
+    </div>
+    <div id="abf" class="hidden" style="background:rgba(255,107,53,.03);border:1px solid rgba(255,107,53,.15);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div style="font-size:9px;color:#FF6B35;letter-spacing:2px;margin-bottom:10px">NEW BET</div>
+      <div class="g2">
+        <div><label class="lbl">DATE</label><input type="date" id="nb-date"></div>
+        <div><label class="lbl">GAME</label><input type="text" id="nb-game" placeholder="Team A vs B"></div>
+        <div><label class="lbl">PICK</label><input type="text" id="nb-pick" placeholder="e.g. Lakers -3.5"></div>
+        <div><label class="lbl">BET ODDS</label><input type="number" id="nb-betOdds" value="-110"></div>
+        <div><label class="lbl">CLOSING ODDS</label><input type="number" id="nb-closingOdds" value="-110"></div>
+        <div><label class="lbl">SPORT</label><select id="nb-sport"><option>AFL</option><option>NBA</option><option>NFL</option></select></div>
+        <div><label class="lbl">BOOKMAKER</label><select id="nb-bk">${BOOKS.map(b=>`<option value="${b.k}">${b.l}</option>`).join("")}</select></div>
+        <div><label class="lbl">RESULT</label><select id="nb-result"><option value="P">Pending</option><option value="W">Win</option><option value="L">Loss</option></select></div>
+      </div>
+      <button class="btn prim" onclick="addBet()">LOG BET</button>
+    </div>
+    ${S.bets.slice().reverse().map(b=>{
+      const c2=cv(b.betOdds,b.closingOdds);
+      const pnl=b.result==="W"?b.stake*(a2d(b.betOdds)-1):b.result==="L"?-b.stake:0;
+      const li=S.limits.find(l=>l.bk===b.bk);
+      return card(`<div style="display:flex;justify-content:space-between;margin-bottom:6px">
+        <div>
+          <div style="display:flex;gap:6px;margin-bottom:3px;flex-wrap:wrap">
+            <span style="font-size:9px;color:${SC[b.sport]||"#FF6B35"}">${b.sport}</span>
+            <span style="font-size:9px;color:#374151">${b.date}</span>
+            <span style="font-size:9px;color:${BOOKS.find(x=>x.k===b.bk)?.c||"#6B7280"}">${bl(b.bk)}</span>
+            ${li?`<span style="font-size:9px;color:#FF4757;background:rgba(255,71,87,.1);padding:1px 5px;border-radius:3px">LIMITED $${li.curr}</span>`:""}
+          </div>
+          <div style="font-size:13px;font-weight:600">${b.pick}</div>
+          <div style="font-size:10px;color:#4A5568">${b.game}</div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:15px;font-weight:900;color:${b.result==="W"?"#4ECDC4":b.result==="L"?"#FF4757":"#F0A500"}">${b.result==="P"?"PENDING":(pnl>=0?"+":"")+"$"+pnl.toFixed(2)}</div>
+          <div style="font-size:9px;color:#374151">stake $${b.stake.toFixed(2)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;font-size:10px">
+        <span style="color:#4A5568">Bet <span style="color:#E8EAF0">${fo(b.betOdds)}</span></span>
+        <span style="color:#4A5568">Close <span style="color:#E8EAF0">${fo(b.closingOdds)}</span></span>
+        <span style="color:${c2>0?"#4ECDC4":"#FF4757"}">CLV ${c2>0?"+":""}${c2.toFixed(2)}%</span>
+      </div>`,`style="border-color:${b.result==="W"?"rgba(78,205,196,.15)":b.result==="L"?"rgba(255,71,87,.15)":"rgba(240,165,0,.15)"};margin-bottom:8px"`);
+    }).join("")}`;
+  }
  
-      return D({style:{minHeight:"100vh",background:"#080B14",color:"#E8EAF0",fontFamily:"'Courier New',monospace"}},
-        D({style:{position:"fixed",inset:0,backgroundImage:"linear-gradient(rgba(255,107,53,0.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,53,0.02) 1px,transparent 1px)",backgroundSize:"40px 40px",pointerEvents:"none",zIndex:0}}),
-        D({style:{position:"relative",zIndex:1,maxWidth:880,margin:"0 auto",padding:"0 14px 100px"}},
+  else if(t==="analysis"){
+    pg.innerHTML=`
+    <div style="padding:10px 14px;background:rgba(78,205,196,.05);border:1px solid rgba(78,205,196,.14);border-radius:10px;font-size:11px;color:#4ECDC4;margin-bottom:14px;line-height:1.6">
+      ◎ Claude analyses each game using live Pinnacle odds + deep knowledge of team form, stats and matchup history.
+    </div>
+    <div style="display:flex;gap:6px;margin-bottom:12px;align-items:center">
+      ${["AFL","NBA","NFL"].map(sp=>`<button class="btn" style="background:${S.aSport===sp?SC[sp]+"18":"transparent"};border:1px solid ${S.aSport===sp?SC[sp]:"rgba(255,255,255,.07)"};color:${S.aSport===sp?SC[sp]:"#374151"}" onclick="S.aSport='${sp}';S.aOdds=[];S.aRes={};renderPage();fetchOdds('${sp}','aOdds')">${sp}</button>`).join("")}
+      <button class="btn tc" style="margin-left:auto" onclick="S.aOdds=[];fetchOdds(S.aSport,'aOdds')">↻ REFRESH</button>
+    </div>
+    ${S.aOdds.length===0?`<div style="text-align:center;padding:40px;color:#374151">No games loaded. Select a sport and hit REFRESH.</div>`:""}
+    ${S.aOdds.map(g=>{
+      const gt=new Date(g.commence_time);
+      const pH=g.bookmakers?.find(b=>b.key==="pinnacle")?.markets?.find(m=>m.key==="h2h");
+      const res=S.aRes[g.id];
+      const loading=res==="LOADING";
+      return card(`
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+          <div>
+            <div style="font-size:9px;color:#374151;margin-bottom:3px">${gt.toLocaleDateString("en-AU")} ${gt.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</div>
+            <div style="font-size:14px;font-weight:700">${g.away_team}</div>
+            <div style="font-size:11px;color:#4A5568">@ ${g.home_team}</div>
+            ${pH?`<div style="display:flex;gap:10px;margin-top:6px;font-size:10px;flex-wrap:wrap">${pH.outcomes?.map(o=>`<span style="color:#4ECDC4">${o.name}: <strong>${fo(o.price)}</strong></span>`).join("")}<span style="color:#374151">· Pinnacle</span></div>`:""}
+          </div>
+          <button class="btn o" ${loading?"disabled":""} onclick="runAnalysis('${g.id}')">${loading?"ANALYSING···":"◎ ANALYSE"}</button>
+        </div>
+        ${res&&res!=="LOADING"?`<div style="background:rgba(255,107,53,.04);border:1px solid rgba(255,107,53,.18);border-radius:10px;padding:14px">
+          <div style="font-size:9px;color:#FF6B35;letter-spacing:2px;margin-bottom:10px">AI ANALYSIS · CLAUDE</div>
+          <div style="font-size:12px;color:#D1D5DB;line-height:1.9;white-space:pre-wrap">${res}</div>
+          <button class="btn o" style="margin-top:12px" onclick="goTab('tracker')">+ LOG THIS BET</button>
+        </div>`:""}
+      `,"style='margin-bottom:12px'");
+    }).join("")}`;
+  }
  
-          // Header
-          D({style:{padding:"20px 0 12px",borderBottom:"1px solid rgba(255,107,53,0.12)",display:"flex",alignItems:"center",gap:12}},
-            D({style:{width:32,height:32,background:"linear-gradient(135deg,#FF6B35,#F0A500)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:900,fontSize:15,color:"#080B14",flexShrink:0}},"E"),
-            D({},
-              D({style:{fontSize:14,fontWeight:700,letterSpacing:3,color:"#FF6B35"}},"EDGE//STACK"),
-              D({style:{fontSize:9,color:"#1F2937",letterSpacing:2}},"AU · NFL · NBA · AFL · AI POWERED")
-            ),
-            D({style:{marginLeft:"auto",display:"flex",gap:6,alignItems:"center"}},
-              T("span",{style:{fontSize:9,color:"#4ECDC4"}},"BK $"),
-              T("input",{value:cfg.bankroll,onChange:e=>setCfg(p=>({...p,bankroll:parseFloat(e.target.value)||0})),style:{width:75,background:"rgba(78,205,196,0.07)",border:"1px solid rgba(78,205,196,0.2)",borderRadius:6,color:"#4ECDC4",padding:"4px 8px",fontSize:13,fontFamily:"inherit",fontWeight:700,textAlign:"right",outline:"none"}})
-            )
-          ),
+  else if(t==="multi"){
+    const mc=mCalc();
+    pg.innerHTML=`
+    <div style="padding:10px 14px;background:rgba(78,205,196,.04);border:1px solid rgba(78,205,196,.12);border-radius:10px;font-size:11px;color:#4ECDC4;margin-bottom:14px;line-height:1.6">
+      ◇ Enter each leg's odds and win probability. Shows whether combining has positive expected value.
+    </div>
+    ${S.legs.map((leg,i)=>card(`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div style="font-size:10px;color:#FF6B35;letter-spacing:2px">LEG ${i+1}</div>
+        ${S.legs.length>2?`<button class="btn r" style="padding:3px 8px;font-size:9px" onclick="S.legs=S.legs.filter(l=>l.id!==${leg.id});renderPage()">✕</button>`:""}
+      </div>
+      <div class="g3">
+        <div style="grid-column:1/-1"><label class="lbl">PICK</label><input type="text" value="${leg.pick}" placeholder="e.g. Collingwood -9.5" onchange="S.legs=S.legs.map(l=>l.id===${leg.id}?{...l,pick:this.value}:l)"></div>
+        <div><label class="lbl">ODDS</label><input type="number" value="${leg.odds}" style="text-align:center;font-size:14px;font-weight:700" onchange="S.legs=S.legs.map(l=>l.id===${leg.id}?{...l,odds:parseInt(this.value)||0}:l);renderPage()"></div>
+        <div><label class="lbl">WIN PROB %</label><input type="number" value="${leg.wp}" style="text-align:center;font-size:14px;font-weight:700" onchange="S.legs=S.legs.map(l=>l.id===${leg.id}?{...l,wp:parseFloat(this.value)||0}:l);renderPage()"></div>
+        <div><label class="lbl">LEG EDGE</label><div style="padding:8px;background:rgba(255,255,255,.03);border-radius:6px;text-align:center;font-size:13px;font-weight:700;color:${(leg.wp-a2i(leg.odds))>0?"#4ECDC4":"#FF4757"}">${(leg.wp-a2i(leg.odds))>0?"+":""}${(leg.wp-a2i(leg.odds)).toFixed(2)}%</div></div>
+      </div>
+    `,"style='margin-bottom:10px'")).join("")}
+    <button class="btn tc" style="width:100%;margin-bottom:14px;padding:10px;text-align:center" onclick="S.legs.push({id:Date.now(),pick:'',odds:-110,wp:55});renderPage()">+ ADD LEG</button>
+    ${mc?`<div style="background:${mc.ev>0?"rgba(78,205,196,.05)":"rgba(255,71,87,.05)"};border:1px solid ${mc.ev>0?"rgba(78,205,196,.2)":"rgba(255,71,87,.2)"};border-radius:12px;padding:16px">
+      <div style="font-size:9px;color:${mc.ev>0?"#4ECDC4":"#FF4757"};letter-spacing:2px;margin-bottom:14px">${mc.ev>0?"✓ POSITIVE EV MULTI":"✗ NEGATIVE EV MULTI"}</div>
+      <div class="g3" style="margin-bottom:14px">
+        ${miniCard("COMBINED ODDS",fo(mc.am),"#FF6B35")}
+        ${miniCard("WIN PROBABILITY",mc.p.toFixed(2)+"%","#F0A500")}
+        ${miniCard("EXPECTED VALUE",(mc.ev>=0?"+":"")+mc.ev.toFixed(3),mc.ev>0?"#4ECDC4":"#FF4757")}
+      </div>
+      <div style="font-size:11px;line-height:1.7;color:${mc.ev>0?"#4ECDC4":"#FF4757"}">${mc.ev>0?"✓ Positive EV "+mc.n+"-leg multi. Max stake: $"+(S.bankroll*.01).toFixed(2)+" (1% bankroll).":"✗ "+(!mc.allPos?"One or more legs have no edge — fix first.":"Combined vig destroys edge.")+" Do not place this multi."}</div>
+    </div>`:""}`;
+  }
  
-          // Tabs
-          D({style:{display:"flex",gap:2,padding:"8px 0 12px",overflowX:"auto"}},
-            ...tabs.map(t=>B({key:t.id,onClick:()=>setTab(t.id),style:{background:tab===t.id?"rgba(255,107,53,0.1)":"transparent",border:tab===t.id?"1px solid rgba(255,107,53,0.4)":"1px solid transparent",color:tab===t.id?"#FF6B35":"#374151",padding:"6px 10px",borderRadius:6,cursor:"pointer",fontSize:9,letterSpacing:2,fontFamily:"inherit",whiteSpace:"nowrap"}},t.icon+" "+t.label))
-          ),
+  else if(t==="kelly"){
+    pg.innerHTML=`
+    <div style="background:rgba(255,107,53,.03);border:1px solid rgba(255,107,53,.12);border-radius:12px;padding:18px;margin-bottom:12px">
+      <div style="font-size:9px;color:#FF6B35;letter-spacing:2px;margin-bottom:14px">△ KELLY CRITERION</div>
+      <div class="g2" style="margin-bottom:14px">
+        <div><label class="lbl">WIN PROBABILITY %</label><input type="number" id="kw" value="55" style="text-align:center;font-size:17px;font-weight:700;color:#FF6B35;border-color:rgba(255,107,53,.33)" oninput="uKelly()"></div>
+        <div><label class="lbl">BET ODDS</label><input type="number" id="ko" value="-110" style="text-align:center;font-size:17px;font-weight:700;color:#FF6B35;border-color:rgba(255,107,53,.33)" oninput="uKelly()"></div>
+      </div>
+      <div style="margin-bottom:14px">
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:#4A5568;margin-bottom:6px">
+          <span>KELLY FRACTION</span><span id="kfl" style="color:#FF6B35">${(S.kf*100).toFixed(0)}% ${S.kf===.5?"· HALF-KELLY ✓":S.kf===1?"· FULL-KELLY ⚠":""}</span>
+        </div>
+        <input type="range" min="0.1" max="1" step="0.05" value="${S.kf}" oninput="S.kf=parseFloat(this.value);document.getElementById('kfl').textContent=(S.kf*100).toFixed(0)+'% '+(S.kf===.5?'· HALF-KELLY ✓':S.kf===1?'· FULL-KELLY ⚠':'');uKelly()">
+      </div>
+      <div class="g3" id="kr"></div>
+      <div id="kw2"></div>
+    </div>
+    <div style="background:rgba(78,205,196,.03);border:1px solid rgba(78,205,196,.1);border-radius:12px;padding:16px">
+      <div style="font-size:9px;color:#4ECDC4;letter-spacing:2px;margin-bottom:12px">PROJECTED GROWTH · 55% WR · 3 BETS/DAY</div>
+      <div class="g3" id="kp"></div>
+    </div>`;
+    uKelly();
+  }
  
-          // DASHBOARD
-          tab==="dashboard"&&D({},
-            ...bookStats.filter(b=>b.atRisk&&!b.limitInfo).map(b=>D({key:b.key,style:{padding:"9px 12px",background:"rgba(255,71,87,0.07)",border:"1px solid rgba(255,71,87,0.2)",borderRadius:8,fontSize:11,color:"#FF4757",marginBottom:9,display:"flex",justifyContent:"space-between"}},
-              T("span",{},"⚠ "+b.label+" — "+b.winRate.toFixed(1)+"% WR over "+b.bets+" bets. Limiting risk HIGH."),
-              T("span",{style:{fontWeight:700}},"ACT NOW")
-            )),
-            D({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10,marginBottom:12}},
-              ...[
-                {label:"WIN RATE",value:winRate.toFixed(1)+"%",sub:wins+"W · "+(settled.length-wins)+"L",color:winRate>=52.4?"#4ECDC4":"#FF4757"},
-                {label:"PROFIT",value:(totalProfit>=0?"+":"")+"$"+totalProfit.toFixed(0),sub:(totalProfit/(cfg.bankroll*0.0275)).toFixed(1)+" units",color:totalProfit>=0?"#FF6B35":"#FF4757"},
-                {label:"AVG CLV",value:(avgCLV>=0?"+":"")+avgCLV.toFixed(2)+"%",sub:clvRate.toFixed(0)+"% positive",color:avgCLV>=0?"#4ECDC4":"#FF4757"},
-                {label:"BETS",value:settled.length,sub:bets.filter(b=>b.result==="P").length+" pending",color:"#F0A500"},
-              ].map((m,i)=>D({key:i,style:{...s.card,position:"relative",overflow:"hidden"}},
-                D({style:{position:"absolute",top:0,left:0,right:0,height:2,background:"linear-gradient(90deg,"+m.color+",transparent)"}}),
-                D({style:{fontSize:9,color:"#374151",letterSpacing:2,marginBottom:4}},m.label),
-                D({style:{fontSize:22,fontWeight:900,color:m.color,lineHeight:1}},m.value),
-                D({style:{fontSize:10,color:"#4A5568",marginTop:4}},m.sub)
-              ))
-            ),
-            D({style:{...s.card,marginBottom:12}},
-              D({style:{fontSize:9,color:"#374151",letterSpacing:2,marginBottom:8}},"◈ BANKROLL GROWTH"),
-              D({style:{display:"flex",justifyContent:"space-between",fontSize:10,color:"#4A5568",marginBottom:6}},
-                T("span",{},"Start: $"+bankrollHistory[0]?.value.toFixed(0)),
-                T("span",{style:{color:totalProfit>=0?"#4ECDC4":"#FF4757"}},"Now: $"+bankrollHistory[bankrollHistory.length-1]?.value.toFixed(0))
-              ),
-              React.createElement(Sparkline,{data:bankrollHistory,color:totalProfit>=0?"#4ECDC4":"#FF4757",height:48})
-            ),
-            D({style:{background:"rgba(255,107,53,0.03)",border:"1px solid rgba(255,107,53,0.12)",borderRadius:12,padding:14,marginBottom:12}},
-              D({style:{fontSize:9,color:"#FF6B35",letterSpacing:2,marginBottom:10}},"◎ EDGE HEALTH"),
-              ...[
-                {label:"Win Rate vs Breakeven 52.4%",val:winRate,threshold:52.4,max:65},
-                {label:"CLV Positive Rate",val:clvRate,threshold:50,max:100},
-                {label:"Sample Confidence (1000+ target)",val:Math.min(settled.length/10,100),threshold:50,max:100},
-              ].map((bar,i)=>D({key:i,style:{marginBottom:9}},
-                D({style:{display:"flex",justifyContent:"space-between",fontSize:10,color:"#4A5568",marginBottom:4}},
-                  T("span",{},bar.label),
-                  T("span",{style:{color:bar.val>=bar.threshold?"#4ECDC4":"#FF4757"}},bar.val.toFixed(1)+"%")
-                ),
-                D({style:{height:3,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden"}},
-                  D({style:{height:"100%",width:Math.min(bar.val/bar.max*100,100)+"%",background:bar.val>=bar.threshold?"#4ECDC4":"#FF4757",borderRadius:3}})
-                )
-              ))
-            ),
-            D({style:{...s.card,padding:0,overflow:"hidden"}},
-              D({style:{padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.05)",fontSize:9,color:"#374151",letterSpacing:2}},"RECENT BETS"),
-              ...bets.slice(-6).reverse().map(bet=>{
-                const clv=calcCLV(bet.betOdds,bet.closingOdds);
-                return D({key:bet.id,style:{display:"flex",alignItems:"center",padding:"9px 14px",borderBottom:"1px solid rgba(255,255,255,0.03)",gap:10}},
-                  D({style:{width:5,height:5,borderRadius:"50%",background:bet.result==="W"?"#4ECDC4":bet.result==="L"?"#FF4757":"#F0A500",flexShrink:0}}),
-                  T("span",{style:{fontSize:9,color:SPORT_COLORS[bet.sport],width:34,flexShrink:0}},bet.sport),
-                  T("span",{style:{flex:1,fontSize:11,color:"#9CA3AF",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},bet.pick),
-                  T("span",{style:{fontSize:9,color:"#374151",flexShrink:0}},bookLabel(bet.bookmaker)),
-                  T("span",{style:{fontSize:10,color:clv>0?"#4ECDC4":"#FF4757",flexShrink:0}},(clv>0?"+":"")+clv.toFixed(1)+"%"),
-                  T("span",{style:{fontSize:11,fontWeight:700,color:bet.result==="W"?"#4ECDC4":bet.result==="L"?"#FF4757":"#F0A500",width:16,textAlign:"center"}},bet.result)
-                );
-              })
-            )
-          ),
+  else if(t==="clv"){
+    pg.innerHTML=`
+    <div style="background:rgba(69,183,209,.03);border:1px solid rgba(69,183,209,.14);border-radius:12px;padding:18px;margin-bottom:12px">
+      <div style="font-size:9px;color:#45B7D1;letter-spacing:2px;margin-bottom:14px">▷ CLV — PINNACLE BENCHMARK</div>
+      <div style="padding:8px 12px;background:rgba(78,205,196,.05);border-radius:6px;font-size:11px;color:#4ECDC4;margin-bottom:12px">Beat Pinnacle's close = verified edge.</div>
+      <div class="g2" style="margin-bottom:12px">
+        <div><label class="lbl">YOUR BET ODDS</label><input type="number" id="cb" value="-110" style="text-align:center;font-size:17px;font-weight:700;color:#45B7D1;border-color:rgba(69,183,209,.33)" oninput="uCLV()"></div>
+        <div><label class="lbl">PINNACLE CLOSING ODDS</label><input type="number" id="cc" value="-115" style="text-align:center;font-size:17px;font-weight:700;color:#45B7D1;border-color:rgba(69,183,209,.33)" oninput="uCLV()"></div>
+      </div>
+      <div class="g3" id="clvr" style="margin-bottom:12px"></div>
+      <div id="clvv"></div>
+    </div>
+    ${card(`<div style="font-size:9px;color:#374151;letter-spacing:2px;margin-bottom:0;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,.05)">ALL BETS · AVG CLV <span style="color:${ac>=0?"#4ECDC4":"#FF4757"}">${ac>=0?"+":""}${ac.toFixed(2)}%</span></div>
+    ${S.bets.map(b=>{const c2=cv(b.betOdds,b.closingOdds);return`<div style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,.03)"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><div><span style="font-size:9px;color:${SC[b.sport]||"#FF6B35"};margin-right:8px">${b.sport}</span><span style="font-size:11px;color:#9CA3AF">${b.pick}</span></div><span style="font-size:11px;font-weight:700;color:${c2>=0?"#4ECDC4":"#FF4757"}">${c2>=0?"+":""}${c2.toFixed(2)}%</span></div><div style="height:2px;background:rgba(255,255,255,.04);border-radius:2px;overflow:hidden"><div style="height:100%;width:${Math.min(Math.abs(c2)*15,100)}%;background:${c2>=0?"#4ECDC4":"#FF4757"};border-radius:2px"></div></div></div>`;}).join("")}`)}`;
+    uCLV();
+  }
  
-          // TRACKER
-          tab==="tracker"&&D({},
-            D({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
-              D({style:{fontSize:9,color:"#374151",letterSpacing:2}},bets.length+" BETS LOGGED"),
-              B({onClick:()=>setShowAddBet(v=>!v),style:s.btn()},"+ LOG BET")
-            ),
-            showAddBet&&D({style:{background:"rgba(255,107,53,0.03)",border:"1px solid rgba(255,107,53,0.15)",borderRadius:12,padding:14,marginBottom:12}},
-              D({style:{fontSize:9,color:"#FF6B35",letterSpacing:2,marginBottom:10}},"NEW BET"),
-              D({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}},
-                ...[{label:"DATE",key:"date",type:"date"},{label:"GAME",key:"game",type:"text",placeholder:"Team A vs B"},{label:"PICK",key:"pick",type:"text",placeholder:"Team A -3.5"},{label:"BET ODDS",key:"betOdds",type:"number"},{label:"CLOSING ODDS",key:"closingOdds",type:"number"}].map(f=>D({key:f.key},
-                  T("label",{style:s.lbl},f.label),
-                  T("input",{type:f.type,placeholder:f.placeholder,value:newBet[f.key],onChange:e=>setNewBet(p=>({...p,[f.key]:f.type==="number"?parseInt(e.target.value)||0:e.target.value})),style:s.fi})
-                )),
-                ...[{label:"SPORT",key:"sport",opts:Object.keys(SPORT_KEYS)},{label:"BOOKMAKER",key:"bookmaker",opts:AU_BOOKS.map(b=>b.key),labels:AU_BOOKS.map(b=>b.label)},{label:"RESULT",key:"result",opts:["P","W","L"],labels:["Pending","Win","Loss"]}].map(f=>D({key:f.key},
-                  T("label",{style:s.lbl},f.label),
-                  T("select",{value:newBet[f.key],onChange:e=>setNewBet(p=>({...p,[f.key]:e.target.value})),style:s.sel},
-                    ...f.opts.map((o,i)=>T("option",{key:o,value:o},f.labels?f.labels[i]:o))
-                  )
-                ))
-              ),
-              D({style:{marginTop:10,padding:"8px 12px",background:"rgba(78,205,196,0.06)",borderRadius:8,fontSize:11,color:"#4ECDC4"}},
-                "Kelly stake: ",T("strong",{},"$"+betSize)," ("+halfKelly.toFixed(2)+"% of bankroll)"
-              ),
-              B({onClick:addBet,style:{marginTop:10,width:"100%",background:"linear-gradient(135deg,#FF6B35,#F0A500)",border:"none",color:"#080B14",padding:"10px",borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,letterSpacing:2,fontFamily:"inherit"}},"LOG BET")
-            ),
-            ...bets.slice().reverse().map(bet=>{
-              const clv=calcCLV(bet.betOdds,bet.closingOdds);
-              const pnl=bet.result==="W"?bet.stake*(americanToDecimal(bet.betOdds)-1):bet.result==="L"?-bet.stake:0;
-              const li=limits.find(l=>l.book===bet.bookmaker);
-              return D({key:bet.id,style:{...s.card,marginBottom:8,border:"1px solid "+(bet.result==="W"?"rgba(78,205,196,0.15)":bet.result==="L"?"rgba(255,71,87,0.15)":"rgba(240,165,0,0.15)")}},
-                D({style:{display:"flex",justifyContent:"space-between",marginBottom:6}},
-                  D({},
-                    D({style:{display:"flex",gap:6,marginBottom:3,flexWrap:"wrap"}},
-                      T("span",{style:{fontSize:9,color:SPORT_COLORS[bet.sport]}},bet.sport),
-                      T("span",{style:{fontSize:9,color:"#374151"}},bet.date),
-                      T("span",{style:{fontSize:9,color:AU_BOOKS.find(b=>b.key===bet.bookmaker)?.color||"#6B7280"}},bookLabel(bet.bookmaker)),
-                      li&&T("span",{style:{fontSize:9,color:"#FF4757",background:"rgba(255,71,87,0.1)",padding:"1px 5px",borderRadius:3}},"LIMITED $"+li.currentMax)
-                    ),
-                    D({style:{fontSize:13,fontWeight:600}},bet.pick),
-                    D({style:{fontSize:10,color:"#4A5568"}},bet.game)
-                  ),
-                  D({style:{textAlign:"right",flexShrink:0}},
-                    D({style:{fontSize:15,fontWeight:900,color:bet.result==="W"?"#4ECDC4":bet.result==="L"?"#FF4757":"#F0A500"}},bet.result==="P"?"PENDING":(pnl>=0?"+":"")+"$"+pnl.toFixed(2)),
-                    D({style:{fontSize:9,color:"#374151"}},"stake $"+bet.stake.toFixed(2))
-                  )
-                ),
-                D({style:{display:"flex",gap:12,fontSize:10}},
-                  T("span",{style:{color:"#4A5568"}},"Bet ",T("span",{style:{color:"#E8EAF0"}},formatOdds(bet.betOdds))),
-                  T("span",{style:{color:"#4A5568"}},"Close ",T("span",{style:{color:"#E8EAF0"}},formatOdds(bet.closingOdds))),
-                  T("span",{style:{color:clv>0?"#4ECDC4":"#FF4757"}},"CLV "+(clv>0?"+":"")+clv.toFixed(2)+"%")
-                )
-              );
-            })
-          ),
+  else if(t==="odds"){
+    pg.innerHTML=`
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center">
+      ${["AFL","NBA","NFL"].map(sp=>`<button class="btn" style="background:${S.oSport===sp?SC[sp]+"18":"transparent"};border:1px solid ${S.oSport===sp?SC[sp]:"rgba(255,255,255,.07)"};color:${S.oSport===sp?SC[sp]:"#374151"}" onclick="S.oSport='${sp}';S.odds=[];S.selGame=null;renderPage();fetchOdds('${sp}','odds')">${sp}</button>`).join("")}
+      <button class="btn tc" style="margin-left:auto" onclick="S.odds=[];S.selGame=null;fetchOdds(S.oSport,'odds')">↻ REFRESH</button>
+    </div>
+    <div style="padding:8px 12px;background:rgba(78,205,196,.04);border:1px solid rgba(78,205,196,.1);border-radius:8px;font-size:10px;color:#4A5568;margin-bottom:10px;display:flex;justify-content:space-between">
+      <span>Live odds via Railway proxy · Enter AU book odds manually below</span>
+      <span>${S.remReq?S.remReq+"/500":""}</span>
+    </div>
+    ${S.oddsErr?`<div style="padding:12px;background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.18);border-radius:8px;color:#FF4757;font-size:12px;margin-bottom:12px">⚠ ${S.oddsErr}</div>`:""}
+    ${S.odds.length===0?`<div style="text-align:center;padding:50px;color:#374151">No games loaded. Select a sport and hit REFRESH.</div>`:""}
+    ${S.odds.map(g=>{
+      const gt=new Date(g.commence_time);
+      const isOpen=S.selGame===g.id;
+      const gm=S.mOdds[g.id]||{};
+      const allPrices=g.bookmakers?.flatMap(bm=>bm.markets?.find(m=>m.key==="h2h")?.outcomes||[])||[];
+      const bestP=allPrices.length?Math.max(...allPrices.map(o=>o.price)):null;
+      return`<div class="card" style="padding:0;overflow:hidden;margin-bottom:10px;border-color:${isOpen?"rgba(255,107,53,.28)":"rgba(255,255,255,.07)"}">
+        <div onclick="S.selGame=S.selGame==='${g.id}'?null:'${g.id}';renderPage()" style="padding:12px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div style="font-size:9px;color:#374151;margin-bottom:3px">${gt.toLocaleDateString("en-AU")} ${gt.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})}</div>
+            <div style="font-size:13px;font-weight:700">${g.away_team}</div>
+            <div style="font-size:10px;color:#4A5568">@ ${g.home_team}</div>
+          </div>
+          <div style="text-align:right">
+            ${bestP?`<div style="font-size:11px;color:#4ECDC4">Best ${fo(bestP)}</div>`:""}
+            <div style="font-size:11px;color:#FF6B35;margin-top:3px">${isOpen?"▲":"▼"}</div>
+          </div>
+        </div>
+        ${isOpen?`<div style="border-top:1px solid rgba(255,255,255,.05);padding:12px 14px">
+          <div style="margin-bottom:14px;background:rgba(255,107,53,.03);border-radius:8px;padding:10px">
+            <div style="font-size:9px;color:#FF6B35;letter-spacing:2px;margin-bottom:8px">MANUAL AU BOOK ODDS (AWAY H2H)</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px">
+              ${MB.map(bk=>{
+                const bi=BOOKS.find(b=>b.k===bk);
+                const val=gm[bk]||"";
+                const pP=g.bookmakers?.find(b=>b.key==="pinnacle")?.markets?.find(m=>m.key==="h2h")?.outcomes[0]?.price;
+                const edge=val&&pP&&parseInt(val)>pP;
+                return`<div style="background:${edge?"rgba(78,205,196,.07)":"rgba(255,255,255,.02)"};border:1px solid ${edge?"rgba(78,205,196,.25)":"rgba(255,255,255,.05)"};border-radius:6px;padding:7px">
+                  <div style="font-size:9px;color:#374151;margin-bottom:3px">${bi?.l}</div>
+                  <input type="number" placeholder="-110" value="${val}" style="width:100%;background:transparent;border:none;border-bottom:1px solid rgba(255,255,255,.08);color:${edge?"#4ECDC4":"#E8EAF0"};font-size:12px;font-weight:700;font-family:inherit;outline:none;padding:2px 0;box-sizing:border-box" onchange="S.mOdds['${g.id}']=S.mOdds['${g.id}']||{};S.mOdds['${g.id}']['${bk}']=this.value;renderPage()">
+                  ${edge?'<div style="font-size:8px;color:#4ECDC4;margin-top:2px">BEATS PIN ✓</div>':""}
+                </div>`;
+              }).join("")}
+            </div>
+          </div>
+          ${["h2h","spreads","totals"].map(market=>{
+            if(!g.bookmakers?.some(b=>b.markets?.find(m=>m.key===market))) return "";
+            const mc2={h2h:"#FF6B35",spreads:"#45B7D1",totals:"#F0A500"};
+            const ml={h2h:"MONEYLINE",spreads:"SPREAD",totals:"TOTAL"};
+            const sides=market==="totals"?["Over","Under"]:[g.away_team,g.home_team];
+            return`<div style="margin-bottom:12px">
+              <div style="font-size:9px;color:${mc2[market]};letter-spacing:2px;margin-bottom:8px">${ml[market]}</div>
+              <div class="g2">
+                ${sides.map((side,ti)=>{
+                  const bms=(g.bookmakers||[]).map(bm=>{
+                    const m=bm.markets?.find(x=>x.key===market);
+                    const o=market==="totals"?m?.outcomes?.find(x=>x.name===side):m?.outcomes[ti];
+                    return o?{key:bm.key,price:o.price,point:o.point}:null;
+                  }).filter(Boolean);
+                  const bp=bms.length?Math.max(...bms.map(b=>b.price)):-999;
+                  return`<div style="background:rgba(255,255,255,.02);border-radius:8px;padding:10px">
+                    <div style="font-size:10px;color:#6B7280;margin-bottom:6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${side}</div>
+                    <div style="display:flex;gap:5px;flex-wrap:wrap">
+                      ${bms.map(bm=>`<div style="background:${bm.price===bp?mc2[market]+"18":"rgba(255,255,255,.03)"};border:1px solid ${bm.price===bp?mc2[market]+"44":"rgba(255,255,255,.05)"};border-radius:6px;padding:5px 7px;text-align:center">
+                        <div style="font-size:8px;color:#374151">${bm.key.replace("_au","").slice(0,4).toUpperCase()}</div>
+                        ${market!=="h2h"?`<div style="font-size:9px;color:#4A5568">${bm.point>0?"+":""}${bm.point}</div>`:""}
+                        <div style="font-size:12px;font-weight:700;color:${bm.price===bp?mc2[market]:"#E8EAF0"}">${fo(bm.price)}</div>
+                      </div>`).join("")}
+                    </div>
+                  </div>`;
+                }).join("")}
+              </div>
+            </div>`;
+          }).join("")}
+          <div style="font-size:10px;color:#1F2937;margin-top:8px">💡 Green = best line. Enter AU book odds above to compare against Pinnacle.</div>
+        </div>`:""}
+      </div>`;
+    }).join("")}`;
+  }
  
-          // AI ANALYSIS
-          tab==="analysis"&&D({},
-            D({style:{padding:"10px 14px",background:"rgba(78,205,196,0.05)",border:"1px solid rgba(78,205,196,0.14)",borderRadius:10,fontSize:11,color:"#4ECDC4",marginBottom:14,lineHeight:1.6}},
-              "◎ Claude analyses each game using live odds + deep knowledge of team form, stats, injuries and matchup history."
-            ),
-            D({style:{display:"flex",gap:6,marginBottom:12,alignItems:"center"}},
-              ...Object.keys(SPORT_KEYS).map(sp=>B({key:sp,onClick:()=>setAnalysisSport(sp),style:{background:analysisSport===sp?SPORT_COLORS[sp]+"18":"transparent",border:"1px solid "+(analysisSport===sp?SPORT_COLORS[sp]:"rgba(255,255,255,0.07)"),color:analysisSport===sp?SPORT_COLORS[sp]:"#374151",padding:"5px 12px",borderRadius:6,cursor:"pointer",fontSize:10,fontFamily:"inherit"}},sp)),
-              B({onClick:()=>fetchLiveOdds(analysisSport,setAnalysisOdds,setAnalysisOddsLoading,null),style:{marginLeft:"auto",...s.btn("#4ECDC4")}},analysisOddsLoading?"···":"↻ REFRESH")
-            ),
-            analysisOddsLoading&&D({style:{textAlign:"center",padding:40,color:"#374151"}},"Loading "+analysisSport+" games···"),
-            !analysisOddsLoading&&analysisOdds.length===0&&D({style:{textAlign:"center",padding:40,color:"#374151"}},"No upcoming "+analysisSport+" games. Try another sport or refresh."),
-            ...analysisOdds.map(game=>{
-              const gameTime=new Date(game.commence_time);
-              const result=analysisResults[game.id];
-              const loading=analysisLoading[game.id];
-              const pinH2H=game.bookmakers?.find(b=>b.key==="pinnacle")?.markets?.find(m=>m.key==="h2h");
-              return D({key:game.id,style:{...s.card,marginBottom:12}},
-                D({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}},
-                  D({},
-                    D({style:{fontSize:9,color:"#374151",marginBottom:3}},gameTime.toLocaleDateString("en-AU")+" "+gameTime.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})),
-                    D({style:{fontSize:14,fontWeight:700}},game.away_team),
-                    D({style:{fontSize:11,color:"#4A5568"}},"@ "+game.home_team),
-                    pinH2H&&D({style:{display:"flex",gap:10,marginTop:6,fontSize:10,flexWrap:"wrap"}},
-                      ...pinH2H.outcomes?.map((o,i)=>T("span",{key:i,style:{color:"#4ECDC4"}},o.name+": ",T("strong",{},formatOdds(o.price)))),
-                      T("span",{style:{color:"#374151"}},"· Pinnacle")
-                    )
-                  ),
-                  B({onClick:()=>runAnalysis(game,analysisSport),disabled:loading,style:{...s.btn("#FF6B35"),flexShrink:0,opacity:loading?0.7:1}},loading?"ANALYSING···":"◎ ANALYSE")
-                ),
-                result&&D({style:{background:"rgba(255,107,53,0.04)",border:"1px solid rgba(255,107,53,0.18)",borderRadius:10,padding:14}},
-                  D({style:{fontSize:9,color:"#FF6B35",letterSpacing:2,marginBottom:10}},"AI ANALYSIS · CLAUDE"),
-                  D({style:{fontSize:12,color:"#D1D5DB",lineHeight:1.9,whiteSpace:"pre-wrap"}},result),
-                  B({onClick:()=>{setShowAddBet(true);setTab("tracker");},style:{...s.btn(),marginTop:12}},"+ LOG THIS BET")
-                )
-              );
-            })
-          ),
+  else if(t==="books"){
+    const bStats=BOOKS.map(bk=>{
+      const bb=s.filter(b=>b.bk===bk.k);
+      const bw=bb.filter(b=>b.result==="W").length;
+      const bwr=bb.length?bw/bb.length*100:0;
+      return{...bk,n:bb.length,wr:bwr,pr:bb.reduce((a,b)=>b.result==="W"?a+b.stake*(a2d(b.betOdds)-1):b.result==="L"?a-b.stake:a,0),cv2:bb.reduce((a,b)=>a+cv(b.betOdds,b.closingOdds),0)/(bb.length||1),li:S.limits.find(l=>l.bk===bk.k),risk:bb.length>=30&&bwr>=58};
+    });
+    pg.innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:9px;color:#374151;letter-spacing:2px">BOOKMAKER HEALTH</div>
+      <button class="btn r" onclick="document.getElementById('alf').classList.toggle('hidden')">+ LOG LIMIT</button>
+    </div>
+    <div id="alf" class="hidden" style="background:rgba(255,71,87,.03);border:1px solid rgba(255,71,87,.15);border-radius:12px;padding:14px;margin-bottom:12px">
+      <div class="g2">
+        <div><label class="lbl">BOOKMAKER</label><select id="nl-bk">${BOOKS.map(b=>`<option value="${b.k}">${b.l}</option>`).join("")}</select></div>
+        <div><label class="lbl">DATE</label><input type="date" id="nl-date"></div>
+        <div><label class="lbl">ORIGINAL MAX $</label><input type="number" id="nl-orig" placeholder="100"></div>
+        <div><label class="lbl">CURRENT MAX $</label><input type="number" id="nl-curr" placeholder="20"></div>
+        <div style="grid-column:1/-1"><label class="lbl">NOTES</label><input type="text" id="nl-notes" placeholder="Reason..."></div>
+      </div>
+      <button class="btn r" style="width:100%;margin-top:10px;padding:10px;font-size:11px;font-weight:700" onclick="addLimit()">LOG LIMIT</button>
+    </div>
+    ${bStats.map(bk=>card(`
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+        <div>
+          <div style="display:flex;gap:7px;align-items:center;margin-bottom:4px">
+            <span style="font-size:13px;font-weight:700;color:${bk.c}">${bk.l}</span>
+            <span style="font-size:9px;color:${bk.c};background:${bk.c}14;padding:2px 6px;border-radius:4px">${bk.t}</span>
+            ${bk.li?'<span style="font-size:9px;color:#FF4757;background:rgba(255,71,87,.1);padding:2px 6px;border-radius:4px">LIMITED</span>':""}
+            ${bk.risk&&!bk.li?'<span style="font-size:9px;color:#F0A500;background:rgba(240,165,0,.1);padding:2px 6px;border-radius:4px">⚠ AT RISK</span>':""}
+          </div>
+          ${bk.li?`<div style="font-size:11px;color:#FF4757">$${bk.li.orig} → $${bk.li.curr} max · ${bk.li.date}</div>`:""}
+          ${bk.risk&&!bk.li?`<div style="font-size:11px;color:#F0A500">${bk.wr.toFixed(1)}% WR — reduce stake now</div>`:""}
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:14px;font-weight:900;color:${bk.pr>=0?"#4ECDC4":"#FF4757"}">${bk.pr>=0?"+":""}$${bk.pr.toFixed(0)}</div>
+          <div style="font-size:9px;color:#374151">${bk.n} bets</div>
+        </div>
+      </div>
+      <div class="g3">
+        ${[{l:"WIN RATE",v:bk.wr.toFixed(1)+"%",c:bk.wr>=52.4?"#4ECDC4":"#FF4757"},{l:"AVG CLV",v:(bk.cv2>=0?"+":"")+bk.cv2.toFixed(2)+"%",c:bk.cv2>=0?"#4ECDC4":"#FF4757"},{l:"STATUS",v:bk.li?"$"+bk.li.curr+" MAX":"ACTIVE",c:bk.li?"#FF4757":"#4ECDC4"}].map(x=>`<div style="background:rgba(255,255,255,.02);border-radius:8px;padding:8px;text-align:center"><div style="font-size:9px;color:#374151;margin-bottom:3px">${x.l}</div><div style="font-size:12px;font-weight:700;color:${x.c}">${x.v}</div></div>`).join("")}
+      </div>
+    `,`style="border-color:${bk.li?"rgba(255,71,87,.22)":bk.risk?"rgba(240,165,0,.22)":"rgba(255,255,255,.07)"};margin-bottom:10px"`)).join("")}`;
+  }
  
-          // MULTI EV
-          tab==="multi"&&D({},
-            D({style:{padding:"10px 14px",background:"rgba(78,205,196,0.04)",border:"1px solid rgba(78,205,196,0.12)",borderRadius:10,fontSize:11,color:"#4ECDC4",marginBottom:14,lineHeight:1.6}},
-              "◇ Enter each leg's odds and estimated win probability. Calculator shows if combining has positive expected value."
-            ),
-            ...multiLegs.map((leg,i)=>D({key:leg.id,style:{...s.card,marginBottom:10}},
-              D({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}},
-                D({style:{fontSize:10,color:"#FF6B35",letterSpacing:2}},"LEG "+(i+1)),
-                multiLegs.length>2&&B({onClick:()=>setMultiLegs(p=>p.filter(l=>l.id!==leg.id)),style:{...s.btn("#FF4757"),padding:"3px 8px",fontSize:9}},"✕")
-              ),
-              D({style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}},
-                D({style:{gridColumn:"1/-1"}},
-                  T("label",{style:s.lbl},"PICK"),
-                  T("input",{type:"text",placeholder:"e.g. Collingwood -9.5",value:leg.pick,onChange:e=>setMultiLegs(p=>p.map(l=>l.id===leg.id?{...l,pick:e.target.value}:l)),style:s.fi})
-                ),
-                D({},T("label",{style:s.lbl},"ODDS"),T("input",{type:"number",value:leg.odds,onChange:e=>setMultiLegs(p=>p.map(l=>l.id===leg.id?{...l,odds:parseInt(e.target.value)||0}:l)),style:{...s.fi,textAlign:"center",fontSize:14,fontWeight:700}})),
-                D({},T("label",{style:s.lbl},"WIN PROB %"),T("input",{type:"number",value:leg.winProb,onChange:e=>setMultiLegs(p=>p.map(l=>l.id===leg.id?{...l,winProb:parseFloat(e.target.value)||0}:l)),style:{...s.fi,textAlign:"center",fontSize:14,fontWeight:700}})),
-                D({},
-                  T("label",{style:s.lbl},"LEG EDGE"),
-                  D({style:{padding:"8px",background:"rgba(255,255,255,0.03)",borderRadius:6,textAlign:"center",fontSize:13,fontWeight:700,color:(leg.winProb-americanToImplied(leg.odds))>0?"#4ECDC4":"#FF4757"}},
-                    ((leg.winProb-americanToImplied(leg.odds))>0?"+":"")+((leg.winProb-americanToImplied(leg.odds)).toFixed(2)+"%")
-                  )
-                )
-              )
-            )),
-            B({onClick:()=>setMultiLegs(p=>[...p,{id:Date.now(),pick:"",odds:-110,winProb:55}]),style:{...s.btn("#4ECDC4"),width:"100%",marginBottom:14,padding:"10px",textAlign:"center"}},"+ ADD LEG"),
-            multiCalc&&D({style:{background:multiCalc.ev>0?"rgba(78,205,196,0.05)":"rgba(255,71,87,0.05)",border:"1px solid "+(multiCalc.ev>0?"rgba(78,205,196,0.2)":"rgba(255,71,87,0.2)"),borderRadius:12,padding:16}},
-              D({style:{fontSize:9,color:multiCalc.ev>0?"#4ECDC4":"#FF4757",letterSpacing:2,marginBottom:14}},multiCalc.ev>0?"✓ POSITIVE EV MULTI":"✗ NEGATIVE EV MULTI"),
-              D({style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:10,marginBottom:14}},
-                ...[
-                  {label:"COMBINED ODDS",value:formatOdds(multiCalc.combinedAmerican),color:"#FF6B35"},
-                  {label:"WIN PROBABILITY",value:multiCalc.combinedProb.toFixed(2)+"%",color:"#F0A500"},
-                  {label:"EXPECTED VALUE",value:(multiCalc.ev>=0?"+":"")+multiCalc.ev.toFixed(3),color:multiCalc.ev>0?"#4ECDC4":"#FF4757"},
-                ].map((x,i)=>D({key:i,style:{...s.card,textAlign:"center"}},
-                  D({style:{fontSize:9,color:"#374151",marginBottom:5}},x.label),
-                  D({style:{fontSize:15,fontWeight:900,color:x.color}},x.value)
-                ))
-              ),
-              D({style:{fontSize:11,lineHeight:1.7}},
-                multiCalc.ev>0
-                  ?T("span",{style:{color:"#4ECDC4"}},"✓ Positive EV "+multiCalc.legs+"-leg multi. Max stake: $"+(cfg.bankroll*0.01).toFixed(2)+" (1% bankroll).")
-                  :T("span",{style:{color:"#FF4757"}},"✗ "+(!multiCalc.allPositive?"One or more legs have no individual edge — fix those first.":"Combined vig destroys edge across legs.")+" Do not place this multi.")
-              )
-            )
-          ),
+  else if(t==="settings"){
+    pg.innerHTML=`
+    <div style="font-size:9px;color:#374151;letter-spacing:2px;margin-bottom:14px">⚙ SETTINGS</div>
+    ${card(`<label class="lbl">BANKROLL $</label><input type="number" value="${S.bankroll}" onchange="S.bankroll=parseFloat(this.value)||0;document.getElementById('bk').value=S.bankroll;uBar()">`,"style='margin-bottom:10px'")}
+    ${card(`<div style="display:flex;justify-content:space-between;font-size:10px;color:#4A5568;margin-bottom:8px"><span>KELLY FRACTION</span><span style="color:#FF6B35">${(S.kf*100).toFixed(0)}% ${S.kf===.5?"· HALF-KELLY ✓":""}</span></div>
+    <input type="range" min="0.1" max="1" step="0.05" value="${S.kf}" oninput="S.kf=parseFloat(this.value)">`,"style='margin-bottom:10px'")}
+    <div class="card" style="background:rgba(255,107,53,.03);border:1px solid rgba(255,107,53,.12)">
+      <div style="font-size:9px;color:#FF6B35;letter-spacing:2px;margin-bottom:12px">DATA SOURCES</div>
+      ${[
+        {name:"The Odds API",status:"Live odds · NFL, NBA, AFL · via this server",color:"#4ECDC4"},
+        {name:"Anthropic Claude",status:"AI analysis · Game insights · Multi EV",color:"#FF6B35"},
+        {name:"Railway Server",status:"This app — no restrictions, always on",color:"#4ECDC4"},
+      ].map(src=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)">
+        <div><div style="font-size:12px;font-weight:600">${src.name}</div><div style="font-size:10px;color:#4A5568">${src.status}</div></div>
+        <div style="font-size:9px;color:${src.color};background:${src.color}14;padding:2px 8px;border-radius:4px">ACTIVE</div>
+      </div>`).join("")}
+    </div>`;
+  }
  
-          // KELLY
-          tab==="kelly"&&D({},
-            D({style:{background:"rgba(255,107,53,0.03)",border:"1px solid rgba(255,107,53,0.12)",borderRadius:12,padding:18,marginBottom:12}},
-              D({style:{fontSize:9,color:"#FF6B35",letterSpacing:2,marginBottom:14}},"△ KELLY CRITERION"),
-              D({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:14}},
-                D({},T("label",{style:s.lbl},"WIN PROBABILITY %"),T("input",{type:"number",value:winProb,onChange:e=>setWinProb(parseFloat(e.target.value)),style:s.inp()})),
-                D({},T("label",{style:s.lbl},"BET ODDS"),T("input",{type:"number",value:betOddsCalc,onChange:e=>setBetOddsCalc(parseInt(e.target.value)||0),style:s.inp()}))
-              ),
-              D({style:{marginBottom:14}},
-                D({style:{display:"flex",justifyContent:"space-between",fontSize:10,color:"#4A5568",marginBottom:6}},
-                  T("span",{},"KELLY FRACTION"),
-                  T("span",{style:{color:"#FF6B35"}},(cfg.kellyFraction*100).toFixed(0)+"% "+(cfg.kellyFraction===0.5?"· HALF-KELLY ✓":cfg.kellyFraction===1?"· FULL-KELLY ⚠":""))
-                ),
-                T("input",{type:"range",min:"0.1",max:"1",step:"0.05",value:cfg.kellyFraction,onChange:e=>setCfg(p=>({...p,kellyFraction:parseFloat(e.target.value)})),style:{width:"100%"}})
-              ),
-              D({style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}},
-                ...[
-                  {label:"EDGE",value:(parseFloat(edge)>0?"+":"")+edge+"%",color:parseFloat(edge)>0?"#4ECDC4":"#FF4757"},
-                  {label:"KELLY %",value:halfKelly.toFixed(2)+"%",color:"#FF6B35"},
-                  {label:"BET SIZE",value:"$"+betSize,color:"#F0A500"},
-                ].map((x,i)=>D({key:i,style:{...s.card,textAlign:"center"}},
-                  D({style:{fontSize:9,color:"#374151",marginBottom:5}},x.label),
-                  D({style:{fontSize:16,fontWeight:900,color:x.color}},x.value)
-                ))
-              ),
-              parseFloat(edge)<=0&&D({style:{marginTop:10,padding:"9px 12px",background:"rgba(255,71,87,0.06)",border:"1px solid rgba(255,71,87,0.18)",borderRadius:8,fontSize:11,color:"#FF4757"}},"⚠ NEGATIVE EDGE — DO NOT BET.")
-            ),
-            D({style:{background:"rgba(78,205,196,0.03)",border:"1px solid rgba(78,205,196,0.1)",borderRadius:12,padding:16}},
-              D({style:{fontSize:9,color:"#4ECDC4",letterSpacing:2,marginBottom:12}},"PROJECTED GROWTH · 55% WR · 3 BETS/DAY"),
-              D({style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}},
-                ...[{p:"1 MONTH",n:90},{p:"3 MONTHS",n:270},{p:"1 YEAR",n:1095}].map((x,i)=>{
-                  const w=Math.round(x.n*0.55),stake=parseFloat(betSize);
-                  const profit=w*stake*(americanToDecimal(betOddsCalc)-1)-(x.n-w)*stake;
-                  return D({key:i,style:{...s.card,textAlign:"center"}},
-                    D({style:{fontSize:9,color:"#374151",marginBottom:4}},x.p),
-                    D({style:{fontSize:14,fontWeight:900,color:profit>=0?"#4ECDC4":"#FF4757"}},"$"+(cfg.bankroll+profit).toFixed(0)),
-                    D({style:{fontSize:10,color:profit>=0?"#4ECDC4":"#FF4757",marginTop:2}},(profit>=0?"+":"")+"$"+profit.toFixed(0))
-                  );
-                })
-              )
-            )
-          ),
+  uBar();
+}
  
-          // CLV
-          tab==="clv"&&D({},
-            D({style:{background:"rgba(69,183,209,0.03)",border:"1px solid rgba(69,183,209,0.14)",borderRadius:12,padding:18,marginBottom:12}},
-              D({style:{fontSize:9,color:"#45B7D1",letterSpacing:2,marginBottom:14}},"▷ CLV — PINNACLE BENCHMARK"),
-              D({style:{padding:"8px 12px",background:"rgba(78,205,196,0.05)",borderRadius:6,fontSize:11,color:"#4ECDC4",marginBottom:12}},"Beat Pinnacle's close = verified edge."),
-              D({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:14,marginBottom:12}},
-                D({},T("label",{style:s.lbl},"YOUR BET ODDS"),T("input",{type:"number",value:betOddsCalc,onChange:e=>setBetOddsCalc(parseInt(e.target.value)||0),style:s.inp("#45B7D1")})),
-                D({},T("label",{style:s.lbl},"PINNACLE CLOSING ODDS"),T("input",{type:"number",value:closingOddsInput,onChange:e=>setClosingOddsInput(parseInt(e.target.value)||0),style:s.inp("#45B7D1")}))
-              ),
-              D({style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}},
-                ...[
-                  {label:"YOUR IMPLIED",value:americanToImplied(betOddsCalc).toFixed(1)+"%",color:"#45B7D1"},
-                  {label:"PINNACLE CLOSE",value:americanToImplied(parseInt(closingOddsInput)).toFixed(1)+"%",color:"#45B7D1"},
-                  {label:"CLV",value:(calcCLV(betOddsCalc,parseInt(closingOddsInput))>=0?"+":"")+calcCLV(betOddsCalc,parseInt(closingOddsInput)).toFixed(2)+"%",color:calcCLV(betOddsCalc,parseInt(closingOddsInput))>=0?"#4ECDC4":"#FF4757"},
-                ].map((x,i)=>D({key:i,style:{...s.card,textAlign:"center"}},
-                  D({style:{fontSize:9,color:"#374151",marginBottom:5}},x.label),
-                  D({style:{fontSize:16,fontWeight:900,color:x.color}},x.value)
-                ))
-              ),
-              D({style:{padding:"10px 12px",background:calcCLV(betOddsCalc,parseInt(closingOddsInput))>=0?"rgba(78,205,196,0.05)":"rgba(255,71,87,0.05)",border:"1px solid "+(calcCLV(betOddsCalc,parseInt(closingOddsInput))>=0?"rgba(78,205,196,0.16)":"rgba(255,71,87,0.16)"),borderRadius:8,fontSize:11}},
-                calcCLV(betOddsCalc,parseInt(closingOddsInput))>=0
-                  ?T("span",{style:{color:"#4ECDC4"}},"✓ POSITIVE CLV — Verified edge.")
-                  :T("span",{style:{color:"#FF4757"}},"✗ NEGATIVE CLV — Market moved against you.")
-              )
-            ),
-            D({style:{...s.card,padding:0,overflow:"hidden"}},
-              D({style:{padding:"10px 14px",borderBottom:"1px solid rgba(255,255,255,0.05)",fontSize:9,color:"#374151",letterSpacing:2}},
-                "ALL BETS · AVG CLV ",T("span",{style:{color:avgCLV>=0?"#4ECDC4":"#FF4757"}},(avgCLV>=0?"+":"")+avgCLV.toFixed(2)+"%")
-              ),
-              ...bets.map(bet=>{
-                const clv=calcCLV(bet.betOdds,bet.closingOdds);
-                return D({key:bet.id,style:{padding:"9px 14px",borderBottom:"1px solid rgba(255,255,255,0.03)"}},
-                  D({style:{display:"flex",justifyContent:"space-between",marginBottom:4}},
-                    D({},T("span",{style:{fontSize:9,color:SPORT_COLORS[bet.sport],marginRight:8}},bet.sport),T("span",{style:{fontSize:11,color:"#9CA3AF"}},bet.pick)),
-                    T("span",{style:{fontSize:11,fontWeight:700,color:clv>=0?"#4ECDC4":"#FF4757"}},(clv>=0?"+":"")+clv.toFixed(2)+"%")
-                  ),
-                  D({style:{height:2,background:"rgba(255,255,255,0.04)",borderRadius:2,overflow:"hidden"}},
-                    D({style:{height:"100%",width:Math.min(Math.abs(clv)*15,100)+"%",background:clv>=0?"#4ECDC4":"#FF4757",borderRadius:2}})
-                  )
-                );
-              })
-            )
-          ),
+function uKelly(){
+  const wp=parseFloat(document.getElementById("kw")?.value||55);
+  const bo=parseInt(document.getElementById("ko")?.value||-110);
+  const edge=(wp-a2i(bo)).toFixed(2);
+  const hk=kl(wp,bo)*S.kf;
+  const bs=(S.bankroll*hk/100).toFixed(2);
+  const r=document.getElementById("kr");
+  if(r) r.innerHTML=[{l:"EDGE",v:(parseFloat(edge)>0?"+":"")+edge+"%",c:parseFloat(edge)>0?"#4ECDC4":"#FF4757"},{l:"KELLY %",v:hk.toFixed(2)+"%",c:"#FF6B35"},{l:"BET SIZE",v:"$"+bs,c:"#F0A500"}].map(x=>miniCard(x.l,x.v,x.c)).join("");
+  const w=document.getElementById("kw2");
+  if(w) w.innerHTML=parseFloat(edge)<=0?'<div style="margin-top:10px;padding:9px 12px;background:rgba(255,71,87,.06);border:1px solid rgba(255,71,87,.18);border-radius:8px;font-size:11px;color:#FF4757">⚠ NEGATIVE EDGE — DO NOT BET.</div>':"";
+  const pr=document.getElementById("kp");
+  if(pr) pr.innerHTML=[{p:"1 MONTH",n:90},{p:"3 MONTHS",n:270},{p:"1 YEAR",n:1095}].map(x=>{
+    const w2=Math.round(x.n*.55),st=parseFloat(bs);
+    const prf=w2*st*(a2d(bo)-1)-(x.n-w2)*st;
+    return miniCard(x.p,"$"+(S.bankroll+prf).toFixed(0)+(prf>=0?" <span style='font-size:10px'>(+"+"$"+prf.toFixed(0)+")</span>":""),prf>=0?"#4ECDC4":"#FF4757");
+  }).join("");
+}
  
-          // LIVE ODDS
-          tab==="odds"&&D({},
-            D({style:{display:"flex",gap:6,marginBottom:10,flexWrap:"wrap",alignItems:"center"}},
-              ...Object.keys(SPORT_KEYS).map(sp=>B({key:sp,onClick:()=>setSelectedSport(sp),style:{background:selectedSport===sp?SPORT_COLORS[sp]+"18":"transparent",border:"1px solid "+(selectedSport===sp?SPORT_COLORS[sp]:"rgba(255,255,255,0.07)"),color:selectedSport===sp?SPORT_COLORS[sp]:"#374151",padding:"5px 12px",borderRadius:6,cursor:"pointer",fontSize:10,fontFamily:"inherit"}},sp)),
-              B({onClick:()=>fetchLiveOdds(selectedSport,setLiveOdds,setOddsLoading,setOddsError),disabled:oddsLoading,style:{marginLeft:"auto",...s.btn("#4ECDC4")}},oddsLoading?"···":"↻ REFRESH")
-            ),
-            D({style:{padding:"8px 12px",background:"rgba(78,205,196,0.04)",border:"1px solid rgba(78,205,196,0.1)",borderRadius:8,fontSize:10,color:"#4A5568",marginBottom:10,display:"flex",justifyContent:"space-between"}},
-              T("span",{},"Live odds via Railway proxy · Enter AU book odds manually"),
-              requestsRemaining&&T("span",{},"Requests: ",T("span",{style:{color:parseInt(requestsRemaining)<50?"#FF4757":"#4ECDC4"}},requestsRemaining+"/500"))
-            ),
-            oddsError&&D({style:{padding:12,background:"rgba(255,71,87,0.06)",border:"1px solid rgba(255,71,87,0.18)",borderRadius:8,color:"#FF4757",fontSize:12,marginBottom:12}},"⚠ "+oddsError),
-            oddsLoading&&D({style:{textAlign:"center",padding:50,color:"#374151"}},"Fetching "+selectedSport+" odds···"),
-            !oddsLoading&&!oddsError&&liveOdds.length===0&&D({style:{textAlign:"center",padding:50,color:"#374151"}},"No upcoming "+selectedSport+" games."),
-            ...liveOdds.map(game=>{
-              const gameTime=new Date(game.commence_time);
-              const isOpen=selectedGame===game.id;
-              const gameManual=manualOdds[game.id]||{};
-              const bestML=getBest(game,"h2h",0);
-              return D({key:game.id,style:{...s.card,marginBottom:10,padding:0,overflow:"hidden",border:"1px solid "+(isOpen?"rgba(255,107,53,0.28)":"rgba(255,255,255,0.07)")}},
-                D({onClick:()=>setSelectedGame(isOpen?null:game.id),style:{padding:"12px 14px",cursor:"pointer",display:"flex",justifyContent:"space-between",alignItems:"center"}},
-                  D({},
-                    D({style:{fontSize:9,color:"#374151",marginBottom:3}},gameTime.toLocaleDateString("en-AU")+" "+gameTime.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"})),
-                    D({style:{fontSize:13,fontWeight:700}},game.away_team),
-                    D({style:{fontSize:10,color:"#4A5568"}},"@ "+game.home_team)
-                  ),
-                  D({style:{textAlign:"right"}},
-                    bestML.odds&&D({style:{fontSize:11,color:"#4ECDC4"}},"Best "+formatOdds(bestML.odds)),
-                    D({style:{fontSize:11,color:"#FF6B35",marginTop:3}},isOpen?"▲":"▼")
-                  )
-                ),
-                isOpen&&D({style:{borderTop:"1px solid rgba(255,255,255,0.05)",padding:"12px 14px"}},
-                  D({style:{marginBottom:14,background:"rgba(255,107,53,0.03)",borderRadius:8,padding:10}},
-                    D({style:{fontSize:9,color:"#FF6B35",letterSpacing:2,marginBottom:8}},"MANUAL AU BOOK ODDS"),
-                    D({style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:6}},
-                      ...MANUAL_BOOKS.map(bk=>{
-                        const binfo=AU_BOOKS.find(b=>b.key===bk);
-                        const val=gameManual[bk]||"";
-                        const pinOdds=game.bookmakers?.find(b=>b.key==="pinnacle")?.markets?.find(m=>m.key==="h2h")?.outcomes[0]?.price;
-                        const hasEdge=val&&pinOdds&&parseInt(val)>pinOdds;
-                        return D({key:bk,style:{background:hasEdge?"rgba(78,205,196,0.07)":"rgba(255,255,255,0.02)",border:"1px solid "+(hasEdge?"rgba(78,205,196,0.25)":"rgba(255,255,255,0.05)"),borderRadius:6,padding:7}},
-                          D({style:{fontSize:9,color:"#374151",marginBottom:3}},binfo?.label),
-                          T("input",{type:"number",placeholder:"−110",value:val,onChange:e=>setManualOdds(p=>({...p,[game.id]:{...p[game.id],[bk]:e.target.value}})),style:{width:"100%",background:"transparent",border:"none",borderBottom:"1px solid rgba(255,255,255,0.08)",color:hasEdge?"#4ECDC4":"#E8EAF0",fontSize:12,fontWeight:700,fontFamily:"inherit",outline:"none",padding:"2px 0",boxSizing:"border-box"}}),
-                          hasEdge&&D({style:{fontSize:8,color:"#4ECDC4",marginTop:2}},"BEATS PIN ✓")
-                        );
-                      })
-                    )
-                  ),
-                  ...["h2h","spreads","totals"].map(market=>{
-                    if(!game.bookmakers?.some(b=>b.markets?.find(m=>m.key===market))) return null;
-                    const mc={h2h:"#FF6B35",spreads:"#45B7D1",totals:"#F0A500"};
-                    const ml={h2h:"MONEYLINE",spreads:"SPREAD",totals:"TOTAL"};
-                    const sides=market==="totals"?["Over","Under"]:[game.away_team,game.home_team];
-                    return D({key:market,style:{marginBottom:12}},
-                      D({style:{fontSize:9,color:mc[market],letterSpacing:2,marginBottom:8}},ml[market]),
-                      D({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}},
-                        ...sides.map((side,ti)=>{
-                          const best=getBest(game,market,ti);
-                          return D({key:ti,style:{background:"rgba(255,255,255,0.02)",borderRadius:8,padding:10}},
-                            D({style:{fontSize:10,color:"#6B7280",marginBottom:6,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},side),
-                            D({style:{display:"flex",gap:5,flexWrap:"wrap"}},
-                              ...game.bookmakers?.map(bm=>{
-                                const m=bm.markets?.find(x=>x.key===market);
-                                const o=market==="totals"?m?.outcomes?.find(x=>x.name===side):m?.outcomes[ti];
-                                if(!o) return null;
-                                const isBest=bm.key===best.book;
-                                const pick=market==="spreads"?o.name+" "+(o.point>0?"+":"")+o.point:market==="totals"?o.name+" "+o.point:side;
-                                return B({key:bm.key,onClick:()=>logFromLive(game,pick,bm.key,o.price),style:{background:isBest?mc[market]+"18":"rgba(255,255,255,0.03)",border:"1px solid "+(isBest?mc[market]+"44":"rgba(255,255,255,0.05)"),borderRadius:6,padding:"5px 7px",cursor:"pointer",fontFamily:"inherit",textAlign:"center"}},
-                                  D({style:{fontSize:8,color:"#374151"}},bm.key.replace("_au","").slice(0,4).toUpperCase()),
-                                  market!=="h2h"&&D({style:{fontSize:9,color:"#4A5568"}},(o.point>0?"+":"")+o.point),
-                                  D({style:{fontSize:12,fontWeight:700,color:isBest?mc[market]:"#E8EAF0"}},formatOdds(o.price))
-                                );
-                              })||[]
-                            )
-                          );
-                        })
-                      )
-                    );
-                  }),
-                  D({style:{fontSize:10,color:"#1F2937",marginTop:8}},"💡 Tap odds to pre-fill tracker. Green = beats Pinnacle.")
-                )
-              );
-            })
-          ),
+function uCLV(){
+  const b=parseInt(document.getElementById("cb")?.value||-110);
+  const c2=parseInt(document.getElementById("cc")?.value||-115);
+  const cvv=cv(b,c2);
+  const r=document.getElementById("clvr");
+  if(r) r.innerHTML=[{l:"YOUR IMPLIED",v:a2i(b).toFixed(1)+"%",c:"#45B7D1"},{l:"PINNACLE CLOSE",v:a2i(c2).toFixed(1)+"%",c:"#45B7D1"},{l:"CLV",v:(cvv>=0?"+":"")+cvv.toFixed(2)+"%",c:cvv>=0?"#4ECDC4":"#FF4757"}].map(x=>miniCard(x.l,x.v,x.c)).join("");
+  const v=document.getElementById("clvv");
+  if(v) v.innerHTML=`<div style="padding:10px 12px;background:${cvv>=0?"rgba(78,205,196,.05)":"rgba(255,71,87,.05)"};border:1px solid ${cvv>=0?"rgba(78,205,196,.16)":"rgba(255,71,87,.16)"};border-radius:8px;font-size:11px;color:${cvv>=0?"#4ECDC4":"#FF4757"}">${cvv>=0?"✓ POSITIVE CLV — Verified edge.":"✗ NEGATIVE CLV — Market moved against you."}</div>`;
+}
  
-          // BOOKS
-          tab==="books"&&D({},
-            D({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}},
-              D({style:{fontSize:9,color:"#374151",letterSpacing:2}},"BOOKMAKER HEALTH"),
-              B({onClick:()=>setShowAddLimit(v=>!v),style:s.btn("#FF4757")},"+ LOG LIMIT")
-            ),
-            showAddLimit&&D({style:{background:"rgba(255,71,87,0.03)",border:"1px solid rgba(255,71,87,0.15)",borderRadius:12,padding:14,marginBottom:12}},
-              D({style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8}},
-                D({},T("label",{style:s.lbl},"BOOKMAKER"),T("select",{value:newLimit.book,onChange:e=>setNewLimit(p=>({...p,book:e.target.value})),style:s.sel},...AU_BOOKS.map(b=>T("option",{key:b.key,value:b.key},b.label)))),
-                D({},T("label",{style:s.lbl},"DATE"),T("input",{type:"date",value:newLimit.date,onChange:e=>setNewLimit(p=>({...p,date:e.target.value})),style:s.fi})),
-                D({},T("label",{style:s.lbl},"ORIGINAL MAX $"),T("input",{type:"number",placeholder:"100",value:newLimit.originalMax,onChange:e=>setNewLimit(p=>({...p,originalMax:e.target.value})),style:s.fi})),
-                D({},T("label",{style:s.lbl},"CURRENT MAX $"),T("input",{type:"number",placeholder:"20",value:newLimit.currentMax,onChange:e=>setNewLimit(p=>({...p,currentMax:e.target.value})),style:s.fi})),
-                D({style:{gridColumn:"1/-1"}},T("label",{style:s.lbl},"NOTES"),T("input",{type:"text",placeholder:"Reason...",value:newLimit.notes,onChange:e=>setNewLimit(p=>({...p,notes:e.target.value})),style:s.fi}))
-              ),
-              B({onClick:addLimit,style:{marginTop:10,width:"100%",background:"rgba(255,71,87,0.1)",border:"1px solid rgba(255,71,87,0.28)",color:"#FF4757",padding:"10px",borderRadius:8,cursor:"pointer",fontSize:11,fontWeight:700,letterSpacing:2,fontFamily:"inherit"}},"LOG LIMIT")
-            ),
-            ...AU_BOOKS.map(book=>{
-              const st=bookStats.find(b=>b.key===book.key);
-              const li=limits.find(l=>l.book===book.key);
-              return D({key:book.key,style:{...s.card,marginBottom:10,border:"1px solid "+(li?"rgba(255,71,87,0.22)":st?.atRisk?"rgba(240,165,0,0.22)":"rgba(255,255,255,0.07)")}},
-                D({style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10}},
-                  D({},
-                    D({style:{display:"flex",gap:7,alignItems:"center",marginBottom:4}},
-                      T("span",{style:{fontSize:13,fontWeight:700,color:book.color}},book.label),
-                      T("span",{style:{fontSize:9,color:book.color,background:book.color+"14",padding:"2px 6px",borderRadius:4}},book.tier),
-                      li&&T("span",{style:{fontSize:9,color:"#FF4757",background:"rgba(255,71,87,0.1)",padding:"2px 6px",borderRadius:4}},"LIMITED"),
-                      st?.atRisk&&!li&&T("span",{style:{fontSize:9,color:"#F0A500",background:"rgba(240,165,0,0.1)",padding:"2px 6px",borderRadius:4}},"⚠ AT RISK")
-                    ),
-                    li&&D({style:{fontSize:11,color:"#FF4757"}},"$"+li.originalMax+" → $"+li.currentMax+" max · "+li.date),
-                    li?.notes&&D({style:{fontSize:10,color:"#4A5568",marginTop:2}},li.notes),
-                    st?.atRisk&&!li&&D({style:{fontSize:11,color:"#F0A500"}},st.winRate.toFixed(1)+"% WR over "+st.bets+" bets — reduce stake now")
-                  ),
-                  D({style:{textAlign:"right"}},
-                    D({style:{fontSize:14,fontWeight:900,color:(st?.profit||0)>=0?"#4ECDC4":"#FF4757"}},(st?.profit||0)>=0?"+":" ","$"+(st?.profit||0).toFixed(0)),
-                    D({style:{fontSize:9,color:"#374151"}},(st?.bets||0)+" bets")
-                  )
-                ),
-                D({style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}},
-                  ...[
-                    {label:"WIN RATE",value:(st?.winRate||0).toFixed(1)+"%",color:(st?.winRate||0)>=52.4?"#4ECDC4":"#FF4757"},
-                    {label:"AVG CLV",value:((st?.clv||0)>=0?"+":"")+((st?.clv||0).toFixed(2))+"%",color:(st?.clv||0)>=0?"#4ECDC4":"#FF4757"},
-                    {label:"STATUS",value:li?"$"+li.currentMax+" MAX":"ACTIVE",color:li?"#FF4757":"#4ECDC4"},
-                  ].map((x,i)=>D({key:i,style:{background:"rgba(255,255,255,0.02)",borderRadius:8,padding:"8px",textAlign:"center"}},
-                    D({style:{fontSize:9,color:"#374151",marginBottom:3}},x.label),
-                    D({style:{fontSize:12,fontWeight:700,color:x.color}},x.value)
-                  ))
-                )
-              );
-            })
-          ),
- 
-          // BREAKDOWN
-          tab==="breakdown"&&D({},
-            D({style:{...s.card,marginBottom:12}},
-              D({style:{fontSize:9,color:"#374151",letterSpacing:2,marginBottom:12}},"◐ BY SPORT"),
-              ...sportStats.map(sp=>D({key:sp.sport,style:{marginBottom:12,paddingBottom:12,borderBottom:"1px solid rgba(255,255,255,0.04)"}},
-                D({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}},
-                  D({style:{display:"flex",gap:8}},
-                    T("span",{style:{fontSize:12,fontWeight:700,color:SPORT_COLORS[sp.sport]}},sp.sport),
-                    T("span",{style:{fontSize:9,color:"#374151"}},sp.bets+" bets")
-                  ),
-                  D({style:{display:"flex",gap:12,fontSize:10}},
-                    T("span",{style:{color:sp.winRate>=52.4?"#4ECDC4":"#FF4757"}},sp.winRate.toFixed(1)+"% WR"),
-                    T("span",{style:{color:sp.clv>=0?"#4ECDC4":"#FF4757"}},(sp.clv>=0?"+":"")+sp.clv.toFixed(2)+"% CLV"),
-                    T("span",{style:{color:sp.profit>=0?"#4ECDC4":"#FF4757",fontWeight:700}},(sp.profit>=0?"+":"")+"$"+sp.profit.toFixed(0))
-                  )
-                ),
-                D({style:{height:3,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden"}},
-                  D({style:{height:"100%",width:(sp.bets?Math.min(sp.winRate/65*100,100):0)+"%",background:sp.winRate>=52.4?SPORT_COLORS[sp.sport]:"#FF4757",borderRadius:3}})
-                )
-              ))
-            ),
-            D({style:{...s.card,marginBottom:12}},
-              D({style:{fontSize:9,color:"#374151",letterSpacing:2,marginBottom:12}},"▣ BY BOOKMAKER"),
-              ...bookStats.filter(b=>b.bets>0).sort((a,b)=>b.profit-a.profit).map(book=>D({key:book.key,style:{marginBottom:11,paddingBottom:11,borderBottom:"1px solid rgba(255,255,255,0.04)"}},
-                D({style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}},
-                  D({style:{display:"flex",gap:7}},
-                    T("span",{style:{fontSize:11,fontWeight:700,color:book.color}},book.label),
-                    T("span",{style:{fontSize:9,color:"#374151"}},book.bets+" bets")
-                  ),
-                  D({style:{display:"flex",gap:10,fontSize:10}},
-                    T("span",{style:{color:book.winRate>=52.4?"#4ECDC4":"#FF4757"}},book.winRate.toFixed(1)+"%"),
-                    T("span",{style:{color:book.clv>=0?"#4ECDC4":"#FF4757"}},(book.clv>=0?"+":"")+book.clv.toFixed(2)+"%"),
-                    T("span",{style:{color:book.profit>=0?"#4ECDC4":"#FF4757",fontWeight:700}},(book.profit>=0?"+":"")+"$"+book.profit.toFixed(0))
-                  )
-                ),
-                D({style:{height:3,background:"rgba(255,255,255,0.04)",borderRadius:3,overflow:"hidden"}},
-                  D({style:{height:"100%",width:(book.bets?Math.min(book.winRate/65*100,100):0)+"%",background:book.profit>=0?book.color:"#FF4757",borderRadius:3}})
-                )
-              ))
-            ),
-            D({style:{background:"rgba(255,107,53,0.03)",border:"1px solid rgba(255,107,53,0.12)",borderRadius:12,padding:14}},
-              D({style:{fontSize:9,color:"#FF6B35",letterSpacing:2,marginBottom:10}},"◈ INSIGHTS"),
-              (()=>{
-                const bs=sportStats.filter(s=>s.bets>0).sort((a,b)=>b.profit-a.profit)[0];
-                const ws=sportStats.filter(s=>s.bets>0).sort((a,b)=>a.profit-b.profit)[0];
-                const bb=bookStats.filter(b=>b.bets>0).sort((a,b)=>b.clv-a.clv)[0];
-                const wb=bookStats.filter(b=>b.bets>0).sort((a,b)=>a.clv-b.clv)[0];
-                return D({style:{display:"flex",flexDirection:"column",gap:7}},
-                  bs&&D({style:{fontSize:11,color:"#4ECDC4"}},"✓ Best sport: ",T("strong",{},bs.sport)," — $"+bs.profit.toFixed(0)+" profit. Focus volume here."),
-                  ws&&ws.profit<0&&D({style:{fontSize:11,color:"#FF4757"}},"✗ Worst sport: ",T("strong",{},ws.sport)," — $"+ws.profit.toFixed(0)+". Reduce until edge proven."),
-                  bb&&D({style:{fontSize:11,color:"#4ECDC4"}},"✓ Best book CLV: ",T("strong",{},bb.label)," — "+bb.clv.toFixed(2)+"%. Prioritise this book."),
-                  wb&&wb.clv<0&&D({style:{fontSize:11,color:"#FF4757"}},"✗ Worst book CLV: ",T("strong",{},wb.label)," — "+wb.clv.toFixed(2)+"%. Bad numbers here."),
-                  settled.length<100&&D({style:{fontSize:11,color:"#F0A500"}},"⚠ "+settled.length+" bets logged. Need 500+ for reliable insights.")
-                );
-              })()
-            )
-          ),
- 
-          // SETTINGS
-          tab==="settings"&&D({},
-            D({style:{fontSize:9,color:"#374151",letterSpacing:2,marginBottom:14}},"⚙ SETTINGS"),
-            D({style:{...s.card,marginBottom:10}},
-              T("label",{style:s.lbl},"BANKROLL $"),
-              T("input",{type:"number",value:cfg.bankroll,onChange:e=>setCfg(p=>({...p,bankroll:parseFloat(e.target.value)||0})),style:s.fi})
-            ),
-            D({style:{...s.card,marginBottom:10}},
-              D({style:{display:"flex",justifyContent:"space-between",fontSize:10,color:"#4A5568",marginBottom:8}},
-                T("span",{},"KELLY FRACTION"),
-                T("span",{style:{color:"#FF6B35"}},(cfg.kellyFraction*100).toFixed(0)+"% "+(cfg.kellyFraction===0.5?"· HALF-KELLY ✓":""))
-              ),
-              T("input",{type:"range",min:"0.1",max:"1",step:"0.05",value:cfg.kellyFraction,onChange:e=>setCfg(p=>({...p,kellyFraction:parseFloat(e.target.value)})),style:{width:"100%"}})
-            ),
-            D({style:{...s.card,background:"rgba(255,107,53,0.03)",border:"1px solid rgba(255,107,53,0.12)"}},
-              D({style:{fontSize:9,color:"#FF6B35",letterSpacing:2,marginBottom:12}},"DATA SOURCES"),
-              ...[
-                {name:"The Odds API",status:"Live odds · NFL, NBA, AFL · via Railway proxy",color:"#4ECDC4"},
-                {name:"Anthropic Claude",status:"AI analysis · Game insights · Multi EV",color:"#FF6B35"},
-                {name:"Railway Proxy",status:"edgestack-proxy-production.up.railway.app",color:"#4ECDC4"},
-              ].map((src,i)=>D({key:i,style:{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 0",borderBottom:"1px solid rgba(255,255,255,0.04)"}},
-                D({},
-                  D({style:{fontSize:12,fontWeight:600}},src.name),
-                  D({style:{fontSize:10,color:"#4A5568"}},src.status)
-                ),
-                D({style:{fontSize:9,color:src.color,background:src.color+"14",padding:"2px 8px",borderRadius:4}},"ACTIVE")
-              ))
-            )
-          )
- 
-        ),
- 
-        // Status bar
-        D({style:{position:"fixed",bottom:0,left:0,right:0,background:"rgba(8,11,20,0.96)",borderTop:"1px solid rgba(255,107,53,0.1)",padding:"8px 16px",display:"flex",justifyContent:"space-between",alignItems:"center",zIndex:10}},
-          D({style:{fontSize:9,color:"#1F2937",letterSpacing:1}},"EDGE//STACK · AU · AI · HOSTED"),
-          D({style:{display:"flex",gap:12}},
-            T("span",{style:{fontSize:9,color:winRate>=52.4?"#4ECDC4":"#FF4757"}},"WIN "+winRate.toFixed(1)+"%"),
-            T("span",{style:{fontSize:9,color:avgCLV>=0?"#4ECDC4":"#FF4757"}},"CLV "+(avgCLV>=0?"+":"")+avgCLV.toFixed(2)+"%"),
-            T("span",{style:{fontSize:9,color:"#FF6B35"}},"BK $"+cfg.bankroll.toFixed(0)),
-            T("span",{style:{fontSize:9,color:limits.length>0?"#FF4757":"#374151"}},limits.length+" LIMITED")
-          )
-        )
-      );
-    }
- 
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(React.createElement(App));
-  </script>
+// Init
+renderTabs();
+renderPage();
+</script>
 </body>
 </html>`);
 });
