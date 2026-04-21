@@ -25,13 +25,12 @@ select{background:#0D1119}
 .o{background:rgba(255,107,53,.18);border:1px solid rgba(255,107,53,.44);color:#FF6B35}
 .tc{background:rgba(78,205,196,.18);border:1px solid rgba(78,205,196,.44);color:#4ECDC4}
 .r{background:rgba(255,71,87,.18);border:1px solid rgba(255,71,87,.44);color:#FF4757}
-.prim{background:linear-gradient(135deg,#FF6B35,#F0A500);color:#080B14;font-weight:700;width:100%;padding:10px;margin-top:10px;font-size:11px;border:none}
+.prim{background:linear-gradient(135deg,#FF6B35,#F0A500);color:#080B14;font-weight:700;width:100%;padding:10px;margin-top:10px;font-size:11px;border:none;border-radius:6px;cursor:pointer;letter-spacing:2px;font-family:inherit}
 .bar{position:fixed;bottom:0;left:0;right:0;background:rgba(8,11,20,.96);border-top:1px solid rgba(255,107,53,.1);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10}
 .hidden{display:none!important}
 input[type=range]{accent-color:#FF6B35}
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-thumb{background:rgba(255,107,53,.3);border-radius:2px}
-.info{padding:10px 14px;border-radius:10px;font-size:11px;margin-bottom:14px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -41,7 +40,7 @@ input[type=range]{accent-color:#FF6B35}
     <div class="logo">E</div>
     <div>
       <div style="font-size:14px;font-weight:700;letter-spacing:3px;color:#FF6B35">EDGE//STACK</div>
-      <div style="font-size:9px;color:#1F2937;letter-spacing:2px">AU · NFL · NBA · AFL · AI POWERED</div>
+      <div style="font-size:9px;color:#1F2937;letter-spacing:2px">AU &middot; NFL &middot; NBA &middot; AFL &middot; AI POWERED</div>
     </div>
     <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
       <span style="font-size:9px;color:#4ECDC4">BK $</span>
@@ -52,7 +51,7 @@ input[type=range]{accent-color:#FF6B35}
   <div id="pg"></div>
 </div>
 <div class="bar">
-  <span style="font-size:9px;color:#1F2937;letter-spacing:1px">EDGE//STACK · AU · AI · LIVE</span>
+  <span style="font-size:9px;color:#1F2937;letter-spacing:1px">EDGE//STACK &middot; AU &middot; AI &middot; LIVE</span>
   <div style="display:flex;gap:12px">
     <span id="b-wr" style="font-size:9px"></span>
     <span id="b-clv" style="font-size:9px"></span>
@@ -60,6 +59,6 @@ input[type=range]{accent-color:#FF6B35}
     <span id="b-lim" style="font-size:9px"></span>
   </div>
 </div>
-<script src="app.js"></script>
+<script src="/app.js"></script>
 </body>
 </html>
