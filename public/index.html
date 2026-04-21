@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>EDGE//STACK</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#080B14;color:#E8EAF0;font-family:'Courier New',monospace;min-height:100vh}
+.bg{position:fixed;inset:0;background-image:linear-gradient(rgba(255,107,53,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,53,.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
+.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 14px 90px}
+.hdr{padding:18px 0 12px;border-bottom:1px solid rgba(255,107,53,.12);display:flex;align-items:center;gap:12px}
+.logo{width:32px;height:32px;background:linear-gradient(135deg,#FF6B35,#F0A500);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#080B14;flex-shrink:0}
+.tabs{display:flex;gap:2px;padding:8px 0 12px;overflow-x:auto}
+.tab{background:transparent;border:1px solid transparent;color:#374151;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:9px;letter-spacing:2px;font-family:inherit;white-space:nowrap}
+.tab.on{background:rgba(255,107,53,.1);border-color:rgba(255,107,53,.4);color:#FF6B35}
+.card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px;margin-bottom:10px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
+.lbl{font-size:9px;color:#374151;letter-spacing:2px;margin-bottom:5px;display:block}
+input,select{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#E8EAF0;padding:8px 10px;font-size:12px;font-family:inherit;box-sizing:border-box;outline:none}
+select{background:#0D1119}
+.btn{border:none;border-radius:6px;cursor:pointer;font-size:10px;letter-spacing:2px;font-family:inherit;padding:7px 14px;white-space:nowrap}
+.o{background:rgba(255,107,53,.18);border:1px solid rgba(255,107,53,.44);color:#FF6B35}
+.tc{background:rgba(78,205,196,.18);border:1px solid rgba(78,205,196,.44);color:#4ECDC4}
+.r{background:rgba(255,71,87,.18);border:1px solid rgba(255,71,87,.44);color:#FF4757}
+.prim{background:linear-gradient(135deg,#FF6B35,#F0A500);color:#080B14;font-weight:700;width:100%;padding:10px;margin-top:10px;font-size:11px;border:none}
+.bar{position:fixed;bottom:0;left:0;right:0;background:rgba(8,11,20,.96);border-top:1px solid rgba(255,107,53,.1);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10}
+.hidden{display:none!important}
+input[type=range]{accent-color:#FF6B35}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-thumb{background:rgba(255,107,53,.3);border-radius:2px}
+.info{padding:10px 14px;border-radius:10px;font-size:11px;margin-bottom:14px;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<div class="wrap">
+  <div class="hdr">
+    <div class="logo">E</div>
+    <div>
+      <div style="font-size:14px;font-weight:700;letter-spacing:3px;color:#FF6B35">EDGE//STACK</div>
+      <div style="font-size:9px;color:#1F2937;letter-spacing:2px">AU · NFL · NBA · AFL · AI POWERED</div>
+    </div>
+    <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
+      <span style="font-size:9px;color:#4ECDC4">BK $</span>
+      <input id="bk-inp" type="number" value="1000" style="width:75px;background:rgba(78,205,196,.07);border:1px solid rgba(78,205,196,.2);color:#4ECDC4;font-weight:700;text-align:right" onchange="S.bankroll=parseFloat(this.value)||0;uBar()">
+    </div>
+  </div>
+  <div class="tabs" id="tabs"></div>
+  <div id="pg"></div>
+</div>
+<div class="bar">
+  <span style="font-size:9px;color:#1F2937;letter-spacing:1px">EDGE//STACK · AU · AI · LIVE</span>
+  <div style="display:flex;gap:12px">
+    <span id="b-wr" style="font-size:9px"></span>
+    <span id="b-clv" style="font-size:9px"></span>
+    <span id="b-bk" style="font-size:9px;color:#FF6B35"></span>
+    <span id="b-lim" style="font-size:9px"></span>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>
