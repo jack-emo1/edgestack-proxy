@@ -8,53 +8,87 @@
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:#080B14;color:#E8EAF0;font-family:'Courier New',monospace;min-height:100vh}
 .bg{position:fixed;inset:0;background-image:linear-gradient(rgba(255,107,53,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(255,107,53,.02) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0}
-.wrap{position:relative;z-index:1;max-width:860px;margin:0 auto;padding:0 14px 90px}
-.hdr{padding:18px 0 12px;border-bottom:1px solid rgba(255,107,53,.12);display:flex;align-items:center;gap:12px}
+#root{position:relative;z-index:1;max-width:900px;margin:0 auto;padding:0 14px 90px}
+/* Header */
+.hdr{padding:16px 0 12px;border-bottom:1px solid rgba(255,107,53,.12);display:flex;align-items:center;gap:12px;margin-bottom:0}
 .logo{width:32px;height:32px;background:linear-gradient(135deg,#FF6B35,#F0A500);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:15px;color:#080B14;flex-shrink:0}
-.tabs{display:flex;gap:2px;padding:8px 0 12px;overflow-x:auto}
-.tab{background:transparent;border:1px solid transparent;color:#374151;padding:6px 10px;border-radius:6px;cursor:pointer;font-size:9px;letter-spacing:2px;font-family:inherit;white-space:nowrap}
+/* Tabs */
+.tabs{display:flex;gap:2px;padding:8px 0 10px;overflow-x:auto;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:12px}
+.tab{background:transparent;border:1px solid transparent;color:#374151;padding:5px 10px;border-radius:6px;cursor:pointer;font-size:9px;letter-spacing:2px;font-family:inherit;white-space:nowrap;transition:all .15s}
 .tab.on{background:rgba(255,107,53,.1);border-color:rgba(255,107,53,.4);color:#FF6B35}
+/* Cards */
 .card{background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:16px;margin-bottom:10px}
+.card-teal{border-color:rgba(78,205,196,.2);background:rgba(78,205,196,.03)}
+.card-orange{border-color:rgba(255,107,53,.2);background:rgba(255,107,53,.03)}
+.card-red{border-color:rgba(255,71,87,.2);background:rgba(255,71,87,.03)}
+.card-green{border-color:rgba(0,168,107,.2);background:rgba(0,168,107,.03)}
+/* Grid */
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:6px}
-.lbl{font-size:9px;color:#374151;letter-spacing:2px;margin-bottom:5px;display:block}
-input,select{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#E8EAF0;padding:8px 10px;font-size:12px;font-family:inherit;box-sizing:border-box;outline:none}
+/* Form */
+.lbl{font-size:9px;color:#374151;letter-spacing:2px;margin-bottom:4px;display:block}
+input,select,textarea{width:100%;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:#E8EAF0;padding:8px 10px;font-size:12px;font-family:inherit;box-sizing:border-box;outline:none}
 select{background:#0D1119}
-.btn{border:none;border-radius:6px;cursor:pointer;font-size:10px;letter-spacing:2px;font-family:inherit;padding:7px 14px;white-space:nowrap}
-.o{background:rgba(255,107,53,.18);border:1px solid rgba(255,107,53,.44);color:#FF6B35}
-.tc{background:rgba(78,205,196,.18);border:1px solid rgba(78,205,196,.44);color:#4ECDC4}
-.r{background:rgba(255,71,87,.18);border:1px solid rgba(255,71,87,.44);color:#FF4757}
-.prim{background:linear-gradient(135deg,#FF6B35,#F0A500);color:#080B14;font-weight:700;width:100%;padding:10px;margin-top:10px;font-size:11px;border:none;border-radius:6px;cursor:pointer;letter-spacing:2px;font-family:inherit}
-.bar{position:fixed;bottom:0;left:0;right:0;background:rgba(8,11,20,.96);border-top:1px solid rgba(255,107,53,.1);padding:8px 16px;display:flex;justify-content:space-between;align-items:center;z-index:10}
+/* Buttons */
+.btn{border:none;border-radius:6px;cursor:pointer;font-size:9px;letter-spacing:2px;font-family:inherit;padding:6px 12px;white-space:nowrap;font-weight:600}
+.btn-o{background:rgba(255,107,53,.15);border:1px solid rgba(255,107,53,.4);color:#FF6B35}
+.btn-t{background:rgba(78,205,196,.15);border:1px solid rgba(78,205,196,.4);color:#4ECDC4}
+.btn-r{background:rgba(255,71,87,.15);border:1px solid rgba(255,71,87,.4);color:#FF4757}
+.btn-g{background:rgba(0,168,107,.15);border:1px solid rgba(0,168,107,.4);color:#00A86B}
+.btn-prim{background:linear-gradient(135deg,#FF6B35,#F0A500);color:#080B14;font-weight:700;border:none;padding:10px;font-size:11px;width:100%;margin-top:8px;border-radius:6px;cursor:pointer;letter-spacing:2px;font-family:inherit}
+/* Status bar */
+.bar{position:fixed;bottom:0;left:0;right:0;background:rgba(8,11,20,.97);border-top:1px solid rgba(255,107,53,.1);padding:7px 16px;display:flex;justify-content:space-between;align-items:center;z-index:100}
+/* Utilities */
 .hidden{display:none!important}
+.sec-title{font-size:9px;letter-spacing:2px;margin-bottom:10px}
+.tag{font-size:9px;padding:2px 6px;border-radius:4px;font-weight:600}
 input[type=range]{accent-color:#FF6B35}
 ::-webkit-scrollbar{width:3px;height:3px}
 ::-webkit-scrollbar-thumb{background:rgba(255,107,53,.3);border-radius:2px}
+/* EV badge */
+.ev-pos{color:#4ECDC4;font-weight:900}
+.ev-neg{color:#FF4757;font-weight:900}
+/* Progress bar */
+.prog-wrap{height:3px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden;margin-top:4px}
+.prog-fill{height:100%;border-radius:3px;transition:width .3s}
+/* Bet card colors */
+.bet-w{border-color:rgba(78,205,196,.2)!important}
+.bet-l{border-color:rgba(255,71,87,.2)!important}
+.bet-p{border-color:rgba(240,165,0,.2)!important}
+/* Value bet card */
+.vbet{border-left:3px solid #4ECDC4}
+.vbet-high{border-left-color:#4ECDC4}
+.vbet-med{border-left-color:#F0A500}
+.vbet-low{border-left-color:#FF6B35}
+/* Warning */
+.warn{background:rgba(255,71,87,.07);border:1px solid rgba(255,71,87,.2);border-radius:8px;padding:10px 12px;font-size:11px;color:#FF4757;margin-bottom:10px}
+.info{background:rgba(78,205,196,.05);border:1px solid rgba(78,205,196,.15);border-radius:8px;padding:10px 12px;font-size:11px;color:#4ECDC4;margin-bottom:10px;line-height:1.6}
 </style>
 </head>
 <body>
 <div class="bg"></div>
-<div class="wrap">
+<div id="root">
   <div class="hdr">
     <div class="logo">E</div>
     <div>
       <div style="font-size:14px;font-weight:700;letter-spacing:3px;color:#FF6B35">EDGE//STACK</div>
-      <div style="font-size:9px;color:#1F2937;letter-spacing:2px">AU &middot; NFL &middot; NBA &middot; AFL &middot; AI POWERED</div>
+      <div style="font-size:9px;color:#1F2937;letter-spacing:2px">BETTING INTELLIGENCE PLATFORM &middot; AU</div>
     </div>
     <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-      <span style="font-size:9px;color:#4ECDC4">BK $</span>
-      <input id="bk-inp" type="number" value="1000" style="width:75px;background:rgba(78,205,196,.07);border:1px solid rgba(78,205,196,.2);color:#4ECDC4;font-weight:700;text-align:right" onchange="S.bankroll=parseFloat(this.value)||0;uBar()">
+      <span style="font-size:9px;color:#4ECDC4">BANKROLL $</span>
+      <input id="bk-inp" type="number" value="1000" style="width:80px;background:rgba(78,205,196,.07);border:1px solid rgba(78,205,196,.2);color:#4ECDC4;font-weight:700;text-align:right" onchange="setBankroll(this.value)">
     </div>
   </div>
   <div class="tabs" id="tabs"></div>
   <div id="pg"></div>
 </div>
 <div class="bar">
-  <span style="font-size:9px;color:#1F2937;letter-spacing:1px">EDGE//STACK &middot; AU &middot; AI &middot; LIVE</span>
-  <div style="display:flex;gap:12px">
-    <span id="b-wr" style="font-size:9px"></span>
+  <span style="font-size:9px;color:#1F2937;letter-spacing:1px">EDGE//STACK v3 &middot; AU &middot; INTELLIGENCE</span>
+  <div style="display:flex;gap:14px">
     <span id="b-clv" style="font-size:9px"></span>
+    <span id="b-ev" style="font-size:9px"></span>
+    <span id="b-conf" style="font-size:9px;color:#F0A500"></span>
     <span id="b-bk" style="font-size:9px;color:#FF6B35"></span>
     <span id="b-lim" style="font-size:9px"></span>
   </div>
