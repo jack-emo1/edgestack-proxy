@@ -110,7 +110,7 @@ function runAnalysis(gid) {
   if (pT) oc.push("Total: "+pT.outcomes.map(function(o){return o.name+" "+o.point+" "+fo(o.price);}).join(" / "));
   var gt = new Date(g.commence_time);
   var prompt = "You are a sharp professional sports betting analyst specialising in Australian betting markets.\n\nGAME: "+g.away_team+" @ "+g.home_team+"\nDATE: "+gt.toLocaleDateString("en-AU")+"\nSPORT: "+S.aSport+"\n\nPINNACLE ODDS:\n"+(oc.join("\n")||"No Pinnacle odds")+"\n\nUsing your knowledge of these teams provide:\n\nEDGE ASSESSMENT: [Value on either side? Which market?]\n\nKEY FACTORS:\n- [Factor 1]\n- [Factor 2]\n- [Factor 3]\n\nRECOMMENDED BET: [Pick, market, which AU book, confidence Low/Medium/High]\n\nCLV EXPECTATION: [Will line move in your favour?]\n\nMULTI POTENTIAL: [Good multi leg or too risky?]\n\nVERDICT: [One sentence. No hedging.]";
-  fetch("https://api.anthropic.com/v1/messages", {
+  fetch("/api/analyse", {
     method: "POST",
     headers: {"Content-Type":"application/json"},
     body: JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,messages:[{role:"user",content:prompt}]})
